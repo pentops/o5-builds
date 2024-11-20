@@ -1,0 +1,14 @@
+---
+options:
+  subPackages:
+    - name: "service"
+    - name: "topic"
+
+packages:
+  - name: j5.registry.registry.v1
+  - name: j5.registry.github.v1
+
+registry:
+  owner: pentops
+  name: registry
+

@@ -1,0 +1,49 @@
+---
+bundles:
+  - name: builds
+    dir: proto
+
+generate:
+  - name: go
+    inputs:
+      - local: builds
+    output: .
+    opts:
+      paths: import
+      module: github.com/pentops/o5-builds
+    plugins:
+      - base: go
+      - base: go-sugar
+      - base: go-grpc
+      - base: go-psm
+      - base: go-o5-messaging
+
+managedPaths:
+  - gen
+
+plugins:
+  - name: go
+    type: PLUGIN_PROTO
+    docker:
+      image: ghcr.io/pentops/protoc-gen-go:v1.32.0
+
+  - name: go-grpc
+    base: go
+    docker:
+      image: ghcr.io/pentops/protoc-gen-go-grpc:v1.3.0
+
+  - name: go-sugar
+    base: go
+    docker:
+      image: ghcr.io/pentops/protoc-gen-go-sugar:b1e769eeea97192209ab5a4e8fc560bf72ce5ba7
+
+  - name: go-psm
+    base: go
+    docker:
+      image: ghcr.io/pentops/protoc-gen-go-protostate:cff8cbc2fe9a78cae00f0c9612203a024e3830ac
+
+  - name: go-o5-messaging
+    base: go
+    docker:
+      image: ghcr.io/pentops/protoc-gen-go-o5-messaging:81b197123419ac73734af5062d4a0d15d43ab92b
+
