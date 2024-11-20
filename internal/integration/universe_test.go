@@ -65,7 +65,7 @@ func setupUniverse(ctx context.Context, t flowtest.Asserter, uu *Universe) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	grpcPair := flowtest.NewGRPCPair(t, app.GRPCMiddleware()...)
+	grpcPair := flowtest.NewGRPCPair(t, app.GRPCMiddleware("dev")...)
 
 	appSet.RegisterGRPC(grpcPair.Server)
 

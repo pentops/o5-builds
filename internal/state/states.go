@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/pentops/o5-builds/gen/j5/builds/github/v1/github_pb"
+	"github.com/pentops/protostate/psm"
 )
 
 type StateMachines struct {
@@ -19,4 +20,10 @@ func NewStateMachines() (*StateMachines, error) {
 	return &StateMachines{
 		Repo: repo,
 	}, nil
+}
+
+func (sm *StateMachines) TableSpecs() []psm.QueryTableSpec {
+	return []psm.QueryTableSpec{
+		sm.Repo.StateTableSpec(),
+	}
 }

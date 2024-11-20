@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/pentops/go-grpc-helpers/protovalidatemw"
+	"github.com/pentops/grpc.go/protovalidatemw"
+	"github.com/pentops/grpc.go/versionmw"
 	"github.com/pentops/log.go/grpc_log"
 	"github.com/pentops/log.go/log"
 	"github.com/pentops/o5-builds/internal/github"
@@ -81,11 +82,12 @@ func (aa *App) RegisterGRPC(srv *grpc.Server) {
 	aa.QueryService.RegisterGRPC(srv)
 }
 
-func GRPCMiddleware() []grpc.UnaryServerInterceptor {
+func GRPCMiddleware(version string) []grpc.UnaryServerInterceptor {
 	return []grpc.UnaryServerInterceptor{
 		grpc_log.UnaryServerInterceptor(log.DefaultContext, log.DefaultTrace, log.DefaultLogger),
 		j5auth.GRPCMiddleware,
 		protovalidatemw.UnaryServerInterceptor(),
+		versionmw.UnaryServerInterceptor(version),
 	}
 }
 
