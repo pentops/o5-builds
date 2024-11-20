@@ -33,7 +33,7 @@ type CheckRunEvent struct {
 type WebhookHandler interface {
 	Push(ctx context.Context, event *PushEvent) error
 	CheckSuite(ctx context.Context, event *CheckSuiteEvent) error
-	CheckRun(ctx context.Context, event *CheckRunEvent) error
+	//CheckRun(ctx context.Context, event *CheckRunEvent) error
 }
 
 const emptyCommit = "0000000000000000000000000000000000000000"
@@ -53,7 +53,7 @@ func (ww *WebhookWorker) RegisterGRPC(srv *grpc.Server) {
 	messaging_tpb.RegisterRawMessageTopicServer(srv, ww)
 }
 
-func (ww *WebhookWorker) RawMessage(ctx context.Context, message *messaging_tpb.RawMessage) (*emptypb.Empty, error) {
+func (ww *WebhookWorker) Raw(ctx context.Context, message *messaging_tpb.RawMessage) (*emptypb.Empty, error) {
 
 	parts := strings.SplitN(message.Topic, ":", 2)
 	if len(parts) != 2 {
@@ -77,8 +77,8 @@ func (ww *WebhookWorker) RawMessage(ctx context.Context, message *messaging_tpb.
 	case *github.CheckSuiteEvent:
 		return &empty.Empty{}, ww.handleCheckSuiteEvent(ctx, event)
 
-	case *github.CheckRunEvent:
-		return &empty.Empty{}, ww.handleCheckRunEvent(ctx, event)
+	//case *github.CheckRunEvent:
+	//	return &empty.Empty{}, ww.handleCheckRunEvent(ctx, event)
 
 	default:
 		return nil, nil
@@ -137,6 +137,7 @@ func (ww *WebhookWorker) handleCheckSuiteEvent(ctx context.Context, event *githu
 	return ww.handler.CheckSuite(ctx, msg)
 }
 
+/*
 func (ww *WebhookWorker) handleCheckRunEvent(ctx context.Context, event *github.CheckRunEvent) error {
 
 	if event.Action == nil {
@@ -186,7 +187,7 @@ func (ww *WebhookWorker) handleCheckRunEvent(ctx context.Context, event *github.
 	}
 
 	return ww.handler.CheckRun(ctx, msg)
-}
+}*/
 
 func (ww *WebhookWorker) handlePushEvent(ctx context.Context, event *github.PushEvent) error {
 

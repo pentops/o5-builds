@@ -168,6 +168,8 @@ github.com/pentops/flowtest v0.0.0-20241110231021-42663ac00b63 h1:c/Km4mfvR35s9u
 github.com/pentops/flowtest v0.0.0-20241110231021-42663ac00b63/go.mod h1:vNp8crAKcH0f/sZU9frkmQLUeDsTIgMqV14kQtkAqC0=
 github.com/pentops/go-grpc-helpers v0.0.0-20241017215039-49310e58e724 h1:fEp/unEa2UvNjX4JP5ne6R7CY/RRvmCMSWdW7QWPQ04=
 github.com/pentops/go-grpc-helpers v0.0.0-20241017215039-49310e58e724/go.mod h1:o4uboIed6b5IWvXyJQanB4QOmmO4ukbO4DvPFFvl7Ns=
+github.com/pentops/golib v0.0.0-20241112050940-7fef6c0232c2 h1:UlrfmZnJ6hQ99pjSgwfxKKAb78tgc8A2+3bVz7bPTeA=
+github.com/pentops/golib v0.0.0-20241112050940-7fef6c0232c2/go.mod h1:I58JIVvL1/nP4CEHGKGbBhvWIEA9mVkGeoviemaqanU=
 github.com/pentops/j5 v0.0.0-20241118024238-cc0053870591 h1:tkRmug8CzP2iSxMD65Aw6Ay9LZmTraw0vy/aickkgn8=
 github.com/pentops/j5 v0.0.0-20241118024238-cc0053870591/go.mod h1:NR62+pdiUYNndQwp90IjYZO9NVVPGm1RH167Zejrds4=
 github.com/pentops/j5build v0.0.0-20241119012443-4a977e113083 h1:G+OsSn87yOpZ580NcC9c9djmDPVIWEAVCRYu9lzdzFg=

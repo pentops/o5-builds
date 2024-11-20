@@ -8,15 +8,13 @@ import (
 
 	"github.com/pentops/flowtest"
 	"github.com/pentops/log.go/log"
+	"github.com/pentops/o5-builds/gen/j5/builds/builder/v1/builder_tpb"
+	"github.com/pentops/o5-builds/gen/j5/builds/github/v1/github_spb"
+	"github.com/pentops/o5-builds/internal/app"
 	"github.com/pentops/o5-builds/internal/integration/mocks"
-	"github.com/pentops/o5-builds/internal/service"
-	"github.com/pentops/o5-builds/internal/state"
 	"github.com/pentops/o5-messaging/gen/o5/messaging/v1/messaging_tpb"
-	"github.com/pentops/o5-messaging/outbox"
 	"github.com/pentops/o5-messaging/outbox/outboxtest"
 	"github.com/pentops/pgtest.go/pgtest"
-	"github.com/pentops/registry/gen/j5/registry/builder/v1/builder_tpb"
-	"github.com/pentops/registry/gen/j5/registry/github/v1/github_spb"
 	"github.com/pentops/sqrlx.go/sqrlx"
 )
 
@@ -62,41 +60,14 @@ func setupUniverse(ctx context.Context, t flowtest.Asserter, uu *Universe) {
 
 	uu.Outbox = outboxtest.NewOutboxAsserter(t, conn)
 	uu.Github = mocks.NewGithubMock()
-
-	grpcPair := flowtest.NewGRPCPair(t, service.GRPCMiddleware()...)
-
-	outboxPub, err := outbox.NewDirectPublisher(db, outbox.DefaultSender)
+	appSet, err := app.NewApp(db, uu.Github)
 	if err != nil {
-		t.Fatalf("failed to create outbox publisher: %v", err)
+		t.Fatalf("unexpected error: %v", err)
 	}
 
-	states, err := state.NewStateMachines()
-	if err != nil {
-		t.Fatalf("failed to create state machines: %v", err)
-	}
+	grpcPair := flowtest.NewGRPCPair(t, app.GRPCMiddleware()...)
 
-	refs, err := service.NewRefStore(db)
-	if err != nil {
-		t.Fatalf("failed to create ref store: %v", err)
-	}
-
-	webhookWorker, err := service.NewWebhookWorker(refs, uu.Github, outboxPub)
-	if err != nil {
-		t.Fatalf("failed to create webhook worker: %v", err)
-	}
-	webhookWorker.RegisterGRPC(grpcPair.Server)
-
-	commandService, err := service.NewGithubCommandService(db, states, webhookWorker)
-	if err != nil {
-		t.Fatalf("failed to create github command service: %v", err)
-	}
-	commandService.RegisterGRPC(grpcPair.Server)
-
-	queryService, err := service.NewGithubQueryService(db, states)
-	if err != nil {
-		t.Fatalf("failed to create github query service: %v", err)
-	}
-	queryService.RegisterGRPC(grpcPair.Server)
+	appSet.RegisterGRPC(grpcPair.Server)
 
 	uu.RawTopic = messaging_tpb.NewRawMessageTopicClient(grpcPair.Client)
 	uu.RepoCommand = github_spb.NewRepoCommandServiceClient(grpcPair.Client)
@@ -104,11 +75,6 @@ func setupUniverse(ctx context.Context, t flowtest.Asserter, uu *Universe) {
 	uu.BuilderReply = builder_tpb.NewBuilderReplyTopicClient(grpcPair.Client)
 
 	grpcPair.ServeUntilDone(t, ctx)
-}
-
-type HTTPResponse struct {
-	Body       []byte
-	StatusCode int
 }
 
 func (uu *Universe) GithubEvent(t flowtest.TB, eventType string, event interface{}) {

@@ -1,0 +1,73 @@
+---
+name: "builds"
+
+deploymentConfig:
+  quickMode: true
+
+blobstores:
+  - name: images
+
+secrets:
+  - name: github
+
+databases:
+  - name: main
+    postgres:
+      runOutbox: true
+      serverGroup: default
+      dbExtensions:
+        - "uuid-ossp"
+
+      migrateContainer:
+        image:
+          name: registry
+          registry: ghcr.io/pentops
+        command: [migrate]
+        envVars:
+          - name: "POSTGRES_URL"
+            database:
+              databaseName: main
+
+runtimes:
+  - name: main
+    routes:
+      - prefix: "/builds/github/v1/"
+        protocol: ROUTE_PROTOCOL_HTTP
+        port: 8080
+
+    subscriptions:
+      - name: "github:push"
+        envName: webhook
+        rawMessage: true
+
+      - name: "/o5.deployer.v1.topic.DeploymentReplyTopic"
+
+    containers:
+      - name: main
+        demand: DEMAND_LIGHT
+        image:
+            name: o5-builds
+            registry: ghcr.io/pentops
+        command: [serve]
+        envVars:
+          - name: POSTGRES_URL
+            database:
+              databaseName: main
+
+          - name: GRPC_PORT
+            value: "8080"
+
+          - name: GH_PRIVATE_KEY
+            secret:
+              secretName: github
+              jsonKey: privateKey
+
+          - name: GH_APP_ID
+            secret:
+              secretName: github
+              jsonKey: appId
+
+          - name: GH_INSTALLATION_ID
+            secret:
+              secretName: github
+              jsonKey: installationId

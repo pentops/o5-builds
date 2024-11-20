@@ -1,4 +1,4 @@
-package service
+package app
 
 import (
 	"context"
@@ -20,10 +20,10 @@ type ReplyWorker struct {
 	awsdeployer_tpb.UnimplementedDeploymentReplyTopicServer
 }
 
-func NewReplyWorker(githubClient IClient) *ReplyWorker {
+func NewReplyWorker(githubClient IClient) (*ReplyWorker, error) {
 	return &ReplyWorker{
 		github: githubClient,
-	}
+	}, nil
 }
 
 func (rw *ReplyWorker) RegisterGRPC(srv *grpc.Server) {
@@ -31,7 +31,7 @@ func (rw *ReplyWorker) RegisterGRPC(srv *grpc.Server) {
 	awsdeployer_tpb.RegisterDeploymentReplyTopicServer(srv, rw)
 }
 
-func (ww *WebhookWorker) BuildStatus(ctx context.Context, message *builder_tpb.BuildStatusMessage) (*emptypb.Empty, error) {
+func (ww *ReplyWorker) BuildStatus(ctx context.Context, message *builder_tpb.BuildStatusMessage) (*emptypb.Empty, error) {
 
 	checkContext := &github_pb.CheckRun{}
 	err := protojson.Unmarshal(message.Request.Context, checkContext)
