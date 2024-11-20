@@ -13,7 +13,6 @@ import (
 	"github.com/pentops/j5build/gen/j5/config/v1/config_j5pb"
 	"github.com/pentops/log.go/log"
 	"github.com/pentops/o5-builds/gen/j5/builds/github/v1/github_pb"
-	"github.com/pentops/o5-builds/internal/git"
 	"github.com/pentops/o5-builds/internal/github"
 	"github.com/pentops/o5-deploy-aws/gen/o5/application/v1/application_pb"
 	"github.com/pentops/o5-deploy-aws/gen/o5/aws/deployer/v1/awsdeployer_tpb"
@@ -357,7 +356,7 @@ func (ww *GithubHandler) j5Build(ctx context.Context, commit *github_pb.Commit) 
 	}
 
 	if cfg.Git != nil {
-		git.ExpandGitAliases(cfg.Git, commitInfo)
+		github.ExpandGitAliases(cfg.Git.Main, commitInfo)
 	}
 
 	type namedBundle struct {
