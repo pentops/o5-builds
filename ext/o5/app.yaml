@@ -21,7 +21,7 @@ databases:
 
       migrateContainer:
         image:
-          name: registry
+          name: o5-builds
           registry: ghcr.io/pentops
         command: [migrate]
         envVars:
