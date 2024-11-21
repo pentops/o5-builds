@@ -16,8 +16,10 @@ import (
 	"buf.build/go/protoyaml"
 	"github.com/bradleyfalzon/ghinstallation"
 	"github.com/pentops/envconf.go/envconf"
+	"github.com/pentops/golib/gl"
 	"github.com/pentops/j5/gen/j5/source/v1/source_j5pb"
 	"github.com/pentops/log.go/log"
+	"github.com/pentops/o5-builds/gen/j5/builds/builder/v1/builder_pb"
 	"github.com/pentops/o5-builds/gen/j5/builds/github/v1/github_pb"
 	"golang.org/x/oauth2"
 	"google.golang.org/protobuf/proto"
@@ -114,28 +116,36 @@ func NewClient(tc *http.Client) (*Client, error) {
 // CreateCheckRun creates a check run at Github for the given commit. If
 // CheckRunUpdate is nil, a check run with status "queued" is created, otherwise
 // details are copied as supplied.
-func (cl Client) CreateCheckRun(ctx context.Context, ref *github_pb.Commit, name string, status *CheckRunUpdate) (*github_pb.CheckRun, error) {
-	if status == nil {
-		status = &CheckRunUpdate{
-			Status: CheckRunStatusQueued,
-		}
-	}
+func (cl Client) CreateCheckRun(ctx context.Context, ref *github_pb.Commit, name string, buildReport *builder_pb.BuildReport) (*github_pb.CheckRun, error) {
 	opts := github.CreateCheckRunOptions{
 		Name:    name,
-		Status:  github.String(string(status.Status)),
+		Status:  github.String(CheckRunStatusQueued),
 		HeadSHA: ref.Sha,
 	}
-	if status.Conclusion != nil {
-		opts.Conclusion = github.String(string(*status.Conclusion))
-	}
 
-	if status.Output != nil {
-		opts.Output = &github.CheckRunOutput{
-			Title:   github.String(status.Output.Title),
-			Summary: github.String(status.Output.Summary),
-			Text:    status.Output.Text,
+	if buildReport != nil {
+		switch buildReport.Status {
+		case builder_pb.BuildStatus_IN_PROGRESS:
+			opts.Status = gl.Ptr(CheckRunStatusInProgress)
+
+		case builder_pb.BuildStatus_FAILURE:
+			opts.Status = gl.Ptr(CheckRunStatusCompleted)
+			opts.Conclusion = gl.Ptr(CheckRunConclusionFailure)
+
+		case builder_pb.BuildStatus_SUCCESS:
+			opts.Status = gl.Ptr(CheckRunStatusCompleted)
+			opts.Conclusion = gl.Ptr(CheckRunConclusionSuccess)
+		}
+
+		if buildReport.Output != nil {
+			opts.Output = &github.CheckRunOutput{
+				Title:   github.String(buildReport.Output.Title),
+				Summary: github.String(buildReport.Output.Summary),
+				Text:    buildReport.Output.Text,
+			}
 		}
 	}
+
 	run, _, err := cl.checks.CreateCheckRun(ctx, ref.Owner, ref.Repo, opts)
 	if err != nil {
 		return nil, err
@@ -154,26 +164,16 @@ func (cl Client) CreateCheckRun(ctx context.Context, ref *github_pb.Commit, name
 	return context, nil
 }
 
-type CheckRunStatus string
-
 const (
-	CheckRunStatusQueued     = CheckRunStatus("queued")
-	CheckRunStatusInProgress = CheckRunStatus("in_progress")
-	CheckRunStatusCompleted  = CheckRunStatus("completed")
+	CheckRunStatusQueued     = ("queued")
+	CheckRunStatusInProgress = ("in_progress")
+	CheckRunStatusCompleted  = ("completed")
 )
 
-type CheckRunConclusion string
-
 const (
-	CheckRunConclusionSuccess = CheckRunConclusion("success")
-	CheckRunConclusionFailure = CheckRunConclusion("failure")
+	CheckRunConclusionSuccess = ("success")
+	CheckRunConclusionFailure = ("failure")
 )
-
-type CheckRunUpdate struct {
-	Status     CheckRunStatus
-	Conclusion *CheckRunConclusion
-	Output     *CheckRunOutput
-}
 
 type CheckRunOutput struct {
 	Title   string
@@ -181,27 +181,36 @@ type CheckRunOutput struct {
 	Text    *string
 }
 
-func (cl Client) UpdateCheckRun(ctx context.Context, checkRun *github_pb.CheckRun, status CheckRunUpdate) error {
-	opts := github.UpdateCheckRunOptions{
-		Name:   checkRun.CheckName,
-		Status: github.String(string(status.Status)),
-	}
-	if status.Conclusion != nil {
-		opts.Conclusion = github.String(string(*status.Conclusion))
+func (cl Client) PublishBuildReport(ctx context.Context, msg *builder_pb.BuildReport) error {
+	checkRun := msg.Build.GithubCheckRun
+	if checkRun == nil {
+		return nil
 	}
 
-	if status.Output != nil {
+	opts := github.UpdateCheckRunOptions{
+		Name: msg.Build.GithubCheckRun.CheckName,
+	}
+
+	switch msg.Status {
+	case builder_pb.BuildStatus_IN_PROGRESS:
+		opts.Status = gl.Ptr(CheckRunStatusInProgress)
+
+	case builder_pb.BuildStatus_FAILURE:
+		opts.Status = gl.Ptr(CheckRunStatusCompleted)
+		opts.Conclusion = gl.Ptr(CheckRunConclusionFailure)
+
+	case builder_pb.BuildStatus_SUCCESS:
+		opts.Status = gl.Ptr(CheckRunStatusCompleted)
+		opts.Conclusion = gl.Ptr(CheckRunConclusionSuccess)
+	}
+
+	if msg.Output != nil {
 		opts.Output = &github.CheckRunOutput{
-			Title:   github.String(status.Output.Title),
-			Summary: github.String(status.Output.Summary),
-			Text:    status.Output.Text,
+			Title:   github.String(msg.Output.Title),
+			Summary: github.String(msg.Output.Summary),
+			Text:    msg.Output.Text,
 		}
 	}
-
-	log.WithFields(ctx, map[string]interface{}{
-		"checkRun":     checkRun,
-		"checkRunOpts": opts,
-	}).Debug("updating check run")
 
 	_, _, err := cl.checks.UpdateCheckRun(ctx, checkRun.CheckSuite.Commit.Owner, checkRun.CheckSuite.Commit.Repo, checkRun.CheckId, opts)
 	return err

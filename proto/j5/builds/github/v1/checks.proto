@@ -22,4 +22,5 @@ message Commit {
   string owner = 1;
   string repo = 2;
   string sha = 3;
+  optional string ref = 4;
 }

@@ -7,20 +7,15 @@ import (
 
 	"buf.build/go/protoyaml"
 	"github.com/pentops/j5/gen/j5/source/v1/source_j5pb"
+	"github.com/pentops/o5-builds/gen/j5/builds/builder/v1/builder_pb"
 	"github.com/pentops/o5-builds/gen/j5/builds/github/v1/github_pb"
-	"github.com/pentops/o5-builds/internal/github"
 	"google.golang.org/protobuf/proto"
 )
 
 type GithubMock struct {
 	Repos map[string]GithubRepo
 
-	CheckRunUpdates []CheckRunUpdate
-}
-
-type CheckRunUpdate struct {
-	CheckRun *github_pb.CheckRun
-	Status   github.CheckRunUpdate
+	CheckRunUpdates []*builder_pb.BuildReport
 }
 
 type GithubRepo struct {
@@ -100,7 +95,7 @@ func (gh *GithubMock) GetCommit(ctx context.Context, ref *github_pb.Commit) (*so
 	return commit.info, nil
 }
 
-func (gh *GithubMock) CreateCheckRun(ctx context.Context, ref *github_pb.Commit, name string, status *github.CheckRunUpdate) (*github_pb.CheckRun, error) {
+func (gh *GithubMock) CreateCheckRun(ctx context.Context, ref *github_pb.Commit, name string, report *builder_pb.BuildReport) (*github_pb.CheckRun, error) {
 	return &github_pb.CheckRun{
 		CheckSuite: &github_pb.CheckSuite{
 			Commit:       ref,
@@ -112,10 +107,7 @@ func (gh *GithubMock) CreateCheckRun(ctx context.Context, ref *github_pb.Commit,
 	}, nil
 }
 
-func (gh *GithubMock) UpdateCheckRun(ctx context.Context, checkRun *github_pb.CheckRun, status github.CheckRunUpdate) error {
-	gh.CheckRunUpdates = append(gh.CheckRunUpdates, CheckRunUpdate{
-		CheckRun: checkRun,
-		Status:   status,
-	})
+func (gh *GithubMock) PublishBuildReport(ctx context.Context, status *builder_pb.BuildReport) error {
+	gh.CheckRunUpdates = append(gh.CheckRunUpdates, status)
 	return nil
 }

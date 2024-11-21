@@ -60,7 +60,7 @@ func setupUniverse(ctx context.Context, t flowtest.Asserter, uu *Universe) {
 
 	uu.Outbox = outboxtest.NewOutboxAsserter(t, conn)
 	uu.Github = mocks.NewGithubMock()
-	appSet, err := app.NewApp(db, uu.Github)
+	appSet, err := app.NewApp(db, uu.Github, nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

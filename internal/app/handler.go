@@ -12,6 +12,7 @@ import (
 	"github.com/pentops/j5/gen/j5/source/v1/source_j5pb"
 	"github.com/pentops/j5build/gen/j5/config/v1/config_j5pb"
 	"github.com/pentops/log.go/log"
+	"github.com/pentops/o5-builds/gen/j5/builds/builder/v1/builder_pb"
 	"github.com/pentops/o5-builds/gen/j5/builds/github/v1/github_pb"
 	"github.com/pentops/o5-builds/internal/github"
 	"github.com/pentops/o5-deploy-aws/gen/o5/application/v1/application_pb"
@@ -26,8 +27,8 @@ import (
 type IClient interface {
 	PullConfig(ctx context.Context, ref *github_pb.Commit, into proto.Message, tryPaths []string) error
 	GetCommit(ctx context.Context, ref *github_pb.Commit) (*source_j5pb.CommitInfo, error)
-	CreateCheckRun(ctx context.Context, ref *github_pb.Commit, name string, status *github.CheckRunUpdate) (*github_pb.CheckRun, error)
-	UpdateCheckRun(ctx context.Context, checkRun *github_pb.CheckRun, status github.CheckRunUpdate) error
+	CreateCheckRun(ctx context.Context, ref *github_pb.Commit, name string, status *builder_pb.BuildReport) (*github_pb.CheckRun, error)
+	PublishBuildReport(ctx context.Context, status *builder_pb.BuildReport) error
 }
 
 type RefMatcher interface {
@@ -59,15 +60,15 @@ func (ww *GithubHandler) Push(ctx context.Context, event *github.PushEvent) erro
 		"owner":     event.Commit.Owner,
 		"repo":      event.Commit.Repo,
 		"commitSha": event.Commit.Sha,
-		"ref":       event.Ref,
+		"ref":       event.Commit.Ref,
 	})
 	log.Debug(ctx, "Push")
 
-	if !strings.HasPrefix(event.Ref, "refs/heads/") {
+	if event.Commit.Ref == nil || !strings.HasPrefix(*event.Commit.Ref, "refs/heads/") {
 		log.Info(ctx, "Not a branch push, nothing to do")
 	}
 
-	branchName := strings.TrimPrefix(event.Ref, "refs/heads/")
+	branchName := strings.TrimPrefix(*event.Commit.Ref, "refs/heads/")
 	return ww.kickOffChecks(ctx, event.Commit, branchName)
 }
 
@@ -98,13 +99,12 @@ func (ww *GithubHandler) kickOffChecks(ctx context.Context, commit *github_pb.Co
 		if !errors.As(err, checkRunError) {
 			return err
 		}
-		_, err = ww.github.CreateCheckRun(ctx, commit, checkRunError.RunName, &github.CheckRunUpdate{
-			Status:     github.CheckRunStatusCompleted,
-			Conclusion: some(github.CheckRunConclusionFailure),
-			Output: &github.CheckRunOutput{
+		_, err = ww.github.CreateCheckRun(ctx, commit, checkRunError.RunName, &builder_pb.BuildReport{
+			Output: &builder_pb.Output{
 				Title:   checkRunError.Title,
 				Summary: checkRunError.Summary,
 			},
+			Status: builder_pb.BuildStatus_BUILD_STATUS_FAILURE,
 		})
 		if err != nil {
 			return fmt.Errorf("create check run: %w", err)
@@ -121,10 +121,8 @@ func (ww *GithubHandler) kickOffChecks(ctx context.Context, commit *github_pb.Co
 		return nil
 	}
 
-	if repo.Data.ChecksEnabled {
-		if err := ww.addGithubChecks(ctx, commit, buildTargets); err != nil {
-			return err
-		}
+	if err := ww.addBuildContext(ctx, commit, buildTargets, repo.Data.ChecksEnabled); err != nil {
+		return err
 	}
 
 	if err := ww.publishTasks(ctx, buildTargets); err != nil {
@@ -144,19 +142,27 @@ func (ww *GithubHandler) publishTasks(ctx context.Context, tasks []*buildTask) e
 	return nil
 }
 
-func (ww *GithubHandler) addGithubChecks(ctx context.Context, commit *github_pb.Commit, tasks []*buildTask) error {
+func (ww *GithubHandler) addBuildContext(ctx context.Context, commit *github_pb.Commit, tasks []*buildTask, runGithubChecks bool) error {
 	for _, task := range tasks {
-		checkRun, err := ww.github.CreateCheckRun(ctx, commit, task.name, nil)
-		if err != nil {
-			return fmt.Errorf("create check run: %w", err)
+		cc := &builder_pb.BuildContext{
+			Commit: commit,
+			Name:   task.name,
 		}
-		contextData, err := protojson.Marshal(checkRun)
+
+		if runGithubChecks {
+			checkRun, err := ww.github.CreateCheckRun(ctx, commit, task.name, nil)
+			if err != nil {
+				return fmt.Errorf("create check run: %w", err)
+			}
+			cc.GithubCheckRun = checkRun
+		}
+
+		contextData, err := protojson.Marshal(cc)
 		if err != nil {
 			return fmt.Errorf("marshal check run: %w", err)
 		}
 		task.message.SetJ5RequestMetadata(&messaging_j5pb.RequestMetadata{
 			Context: contextData,
-			// reply to not set.
 		})
 	}
 	return nil

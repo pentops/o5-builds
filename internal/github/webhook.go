@@ -16,7 +16,6 @@ import (
 
 type PushEvent struct {
 	Commit *github_pb.Commit
-	Ref    string
 }
 
 type CheckSuiteEvent struct {
@@ -229,8 +228,8 @@ func (ww *WebhookWorker) handlePushEvent(ctx context.Context, event *github.Push
 			Sha:   *event.After,
 			Repo:  *event.Repo.Name,
 			Owner: *event.Repo.Owner.Name,
+			Ref:   event.Ref,
 		},
-		Ref: *event.Ref,
 	}
 
 	return ww.handler.Push(ctx, msg)

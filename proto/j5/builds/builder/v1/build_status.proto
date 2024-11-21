@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package j5.builds.builder.v1;
+
+import "buf/validate/validate.proto";
+import "j5/builds/github/v1/checks.proto";
+import "j5/ext/v1/annotations.proto";
+import "j5/list/v1/annotations.proto";
+import "j5/state/v1/metadata.proto";
+
+option go_package = "github.com/pentops/o5-builds/gen/j5/builds/builder/v1/builder_pb";
+
+message BuildContext {
+  j5.builds.github.v1.Commit commit = 1;
+  string name = 2;
+  optional j5.builds.github.v1.CheckRun github_check_run = 4;
+}
+
+message BuildReport {
+  BuildContext build = 1;
+
+  BuildStatus Status = 6 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).enum = {
+      not_in: 0
+      defined_only: true
+    }
+  ];
+  Output output = 7;
+}
+
+enum BuildStatus {
+  BUILD_STATUS_UNSPECIFIED = 0;
+  BUILD_STATUS_IN_PROGRESS = 1;
+  BUILD_STATUS_SUCCESS = 2;
+  BUILD_STATUS_FAILURE = 3;
+}
+
+message Output {
+  string title = 1;
+  string summary = 2;
+  optional string text = 3;
+}

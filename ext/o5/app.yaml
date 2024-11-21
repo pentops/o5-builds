@@ -71,3 +71,8 @@ runtimes:
             secret:
               secretName: github
               jsonKey: installationId
+
+          - name: SLACK_URL
+            secret:
+              secretName: slack
+              jsonKey: url

@@ -16,6 +16,7 @@ import (
 	"github.com/pentops/j5/lib/j5grpc"
 	"github.com/pentops/o5-builds/internal/app"
 	"github.com/pentops/o5-builds/internal/github"
+	"github.com/pentops/o5-builds/internal/slack"
 	"github.com/pentops/o5-builds/internal/state"
 	"github.com/pentops/runner/commander"
 	"github.com/pentops/sqrlx.go/sqrlx"
@@ -86,7 +87,7 @@ func runMigrate(ctx context.Context, config struct {
 
 func runServiceInfo(_ context.Context, _ struct{}) error {
 	grpcServer := grpc.NewServer()
-	ordersSet, err := app.NewApp(nil, nil)
+	ordersSet, err := app.NewApp(nil, nil, nil)
 	if err != nil {
 		return fmt.Errorf("failed to build OMS: %w", err)
 	}
@@ -97,6 +98,7 @@ func runServiceInfo(_ context.Context, _ struct{}) error {
 func runServe(ctx context.Context, config struct {
 	PublicAddr  string `env:"PUBLIC_ADDR" default:":8081"`
 	PostgresURL string `env:"POSTGRES_URL"`
+	SlackURL    string `env:"SLACK_URL" default:""`
 }) error {
 
 	dbConn, err := openDatabase(ctx, config.PostgresURL)
@@ -115,7 +117,12 @@ func runServe(ctx context.Context, config struct {
 		return err
 	}
 
-	ordersSet, err := app.NewApp(db, githubClient)
+	var slackClient *slack.Publisher
+	if config.SlackURL != "" {
+		slackClient = slack.NewPublisher(config.SlackURL)
+	}
+
+	ordersSet, err := app.NewApp(db, githubClient, slackClient)
 	if err != nil {
 		return fmt.Errorf("failed to build OMS: %w", err)
 	}

@@ -25,7 +25,7 @@ type App struct {
 	ReplyWorker    *ReplyWorker
 }
 
-func NewApp(db sqrlx.Transactor, githubClient IClient) (*App, error) {
+func NewApp(db sqrlx.Transactor, githubClient IClient, slack IBuildPublisher) (*App, error) {
 
 	outboxPub, err := outbox.NewDirectPublisher(db, outbox.DefaultSender)
 	if err != nil {
@@ -52,7 +52,14 @@ func NewApp(db sqrlx.Transactor, githubClient IClient) (*App, error) {
 		return nil, fmt.Errorf("failed to create webhook worker: %w", err)
 	}
 
-	replyWorker, err := NewReplyWorker(githubClient)
+	publishers := []IBuildPublisher{
+		githubClient,
+	}
+	if slack != nil {
+		publishers = append(publishers, slack)
+	}
+
+	replyWorker, err := NewReplyWorker(publishers...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create reply worker: %w", err)
 	}

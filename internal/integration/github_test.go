@@ -12,6 +12,7 @@ import (
 	"github.com/pentops/flowtest"
 	"github.com/pentops/golib/gl"
 	"github.com/pentops/j5build/gen/j5/config/v1/config_j5pb"
+	"github.com/pentops/o5-builds/gen/j5/builds/builder/v1/builder_pb"
 	"github.com/pentops/o5-builds/gen/j5/builds/builder/v1/builder_tpb"
 	"github.com/pentops/o5-builds/gen/j5/builds/github/v1/github_pb"
 	"github.com/pentops/o5-builds/gen/j5/builds/github/v1/github_spb"
@@ -212,7 +213,7 @@ func TestJ5Trigger(t *testing.T) {
 		t.Logf("buildAPI: %v", buildRoot.Request)
 		_, err := uu.BuilderReply.BuildStatus(ctx, &builder_tpb.BuildStatusMessage{
 			Request: buildRoot.Request,
-			Status:  builder_tpb.BuildStatus_BUILD_STATUS_SUCCESS,
+			Status:  builder_pb.BuildStatus_BUILD_STATUS_SUCCESS,
 		})
 		t.NoError(err)
 
@@ -222,8 +223,8 @@ func TestJ5Trigger(t *testing.T) {
 		}
 		got := gotStatus[0]
 
-		t.Equal("owner", got.CheckRun.CheckSuite.Commit.Owner)
-		t.Equal("repo", got.CheckRun.CheckSuite.Commit.Repo)
+		t.Equal("owner", got.Build.GithubCheckRun.CheckSuite.Commit.Owner)
+		t.Equal("repo", got.Build.GithubCheckRun.CheckSuite.Commit.Repo)
 
 	})
 }
