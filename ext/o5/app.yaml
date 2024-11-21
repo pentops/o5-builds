@@ -38,7 +38,6 @@ runtimes:
 
     subscriptions:
       - name: "github:push"
-        envName: webhook
         rawMessage: true
 
       - name: "/o5.deployer.v1.topic.DeploymentReplyTopic"
