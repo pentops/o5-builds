@@ -9,6 +9,7 @@ blobstores:
 
 secrets:
   - name: github
+  - name: slack
 
 databases:
   - name: main

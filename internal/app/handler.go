@@ -425,7 +425,3 @@ func (ww *GithubHandler) j5Build(ctx context.Context, commit *github_pb.Commit) 
 
 	return output, nil
 }
-
-func some[T any](s T) *T {
-	return &s
-}
