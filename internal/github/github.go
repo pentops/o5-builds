@@ -14,7 +14,7 @@ import (
 	"strings"
 
 	"buf.build/go/protoyaml"
-	"github.com/bradleyfalzon/ghinstallation"
+	ghinstallation "github.com/bradleyfalzon/ghinstallation/v2"
 	"github.com/pentops/envconf.go/envconf"
 	"github.com/pentops/golib/gl"
 	"github.com/pentops/j5/gen/j5/source/v1/source_j5pb"

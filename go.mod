@@ -5,7 +5,7 @@ go 1.23.2
 require (
 	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.35.2-20240920164238-5a7b106cbb87.1
 	buf.build/go/protoyaml v0.2.0
-	github.com/bradleyfalzon/ghinstallation v1.1.1
+	github.com/bradleyfalzon/ghinstallation/v2 v2.12.0
 	github.com/elgris/sqrl v0.0.0-20210727210741-7e0198b30236
 	github.com/golang/protobuf v1.5.4
 	github.com/google/go-github/v47 v47.1.0
@@ -37,10 +37,10 @@ require (
 require (
 	github.com/antlr4-go/antlr/v4 v4.13.1 // indirect
 	github.com/bufbuild/protovalidate-go v0.7.2 // indirect
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/fatih/color v1.18.0 // indirect
+	github.com/golang-jwt/jwt/v4 v4.5.1 // indirect
 	github.com/google/cel-go v0.21.0 // indirect
-	github.com/google/go-github/v29 v29.0.3 // indirect
+	github.com/google/go-github/v66 v66.0.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/iancoleman/strcase v0.3.0 // indirect
 	github.com/lib/pq v1.10.9 // indirect
