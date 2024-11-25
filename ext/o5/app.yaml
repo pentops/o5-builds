@@ -54,8 +54,8 @@ runtimes:
             database:
               databaseName: main
 
-          - name: GRPC_PORT
-            value: "8080"
+          - name: PUBLIC_ADDR
+            value: ":8080"
 
           - name: GH_PRIVATE_KEY
             secret:

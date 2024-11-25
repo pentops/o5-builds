@@ -45,7 +45,7 @@ func openDatabase(ctx context.Context, dbURL string) (*sql.DB, error) {
 
 	for {
 		if err := db.Ping(); err != nil {
-			log.WithError(ctx, err).Error("pinging PG")
+			log.WithError(ctx, err).Warn("pinging PG")
 			time.Sleep(time.Second)
 			continue
 		}
