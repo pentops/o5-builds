@@ -10,5 +10,5 @@ packages:
 
 registry:
   owner: pentops
-  name: registry
+  name: builds
 
