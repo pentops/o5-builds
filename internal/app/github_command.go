@@ -106,6 +106,11 @@ func (ss *GithubCommandService) Trigger(ctx context.Context, req *github_spb.Tri
 		return nil, err
 	}
 
+	err = ss.builder.addBuildContext(ctx, ref, buildMessages, false)
+	if err != nil {
+		return nil, fmt.Errorf("add build context: %w", err)
+	}
+
 	for _, msg := range buildMessages {
 		err := ss.builder.publisher.Publish(ctx, msg.message)
 		if err != nil {
