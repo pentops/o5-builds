@@ -64,7 +64,7 @@ func NewApp(db sqrlx.Transactor, githubClient IClient, slack IBuildPublisher) (*
 		return nil, fmt.Errorf("failed to create reply worker: %w", err)
 	}
 
-	commandService, err := NewGithubCommandService(db, states, githubHandler)
+	commandService, err := NewGithubCommandService(db, states, githubHandler, githubClient)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create github command service: %w", err)
 	}

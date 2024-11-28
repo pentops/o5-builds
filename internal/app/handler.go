@@ -29,6 +29,7 @@ type IClient interface {
 	GetCommit(ctx context.Context, ref *github_pb.Commit) (*source_j5pb.CommitInfo, error)
 	CreateCheckRun(ctx context.Context, ref *github_pb.Commit, name string, status *builder_pb.BuildReport) (*github_pb.CheckRun, error)
 	PublishBuildReport(ctx context.Context, status *builder_pb.BuildReport) error
+	BranchHead(ctx context.Context, ref *github_pb.Commit) (string, error)
 }
 
 type RefMatcher interface {

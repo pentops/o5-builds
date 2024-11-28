@@ -54,6 +54,10 @@ func (gh *GithubMock) TestPush(owner, name string, commit GithubCommit, refs ...
 	r.Commits[commit.SHA] = commit
 }
 
+func (gh *GithubMock) BranchHead(ctx context.Context, ref *github_pb.Commit) (string, error) {
+	return "12345", nil
+}
+
 func (gh *GithubMock) PullConfig(ctx context.Context, ref *github_pb.Commit, into proto.Message, tryPaths []string) error {
 	repo, ok := gh.Repos[ref.Owner+"/"+ref.Repo]
 	if !ok {

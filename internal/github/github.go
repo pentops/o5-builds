@@ -40,6 +40,7 @@ type RepositoriesService interface {
 	GetArchiveLink(ctx context.Context, owner string, repo string, archiveFormat github.ArchiveFormat, opts *github.RepositoryContentGetOptions, maxRedirects int) (*url.URL, *github.Response, error)
 	GetCommit(ctx context.Context, owner string, repo string, ref string, opts *github.ListOptions) (*github.RepositoryCommit, *github.Response, error)
 	ListBranchesHeadCommit(ctx context.Context, owner string, repo string, sha string) ([]*github.BranchCommit, *github.Response, error)
+	GetBranch(ctx context.Context, owner string, repo string, branch string, maxRedirects int) (*github.Branch, *github.Response, error)
 }
 
 type ChecksService interface {
@@ -252,6 +253,32 @@ func (cl Client) PullConfig(ctx context.Context, ref *github_pb.Commit, into pro
 	}
 
 	return fmt.Errorf("no config found")
+}
+
+func (cl Client) BranchHead(ctx context.Context, ref *github_pb.Commit) (string, error) {
+
+	if ref.Sha != "" {
+		return ref.Sha, nil
+	}
+
+	if ref.Ref == nil {
+		return "", fmt.Errorf("no ref or sha")
+	}
+
+	if strings.HasPrefix(*ref.Ref, "refs/heads/") {
+		branch := strings.TrimPrefix(*ref.Ref, "refs/heads/")
+		rr, _, err := cl.repositories.GetBranch(ctx, ref.Owner, ref.Repo, branch, 1)
+		if err != nil {
+			return "", err
+		}
+
+		commit := rr.GetCommit()
+		sha := commit.GetSHA()
+		return sha, nil
+	}
+
+	return "", fmt.Errorf("invalid ref %q", *ref.Ref)
+
 }
 
 func (cl Client) GetCommit(ctx context.Context, ref *github_pb.Commit) (*source_j5pb.CommitInfo, error) {
