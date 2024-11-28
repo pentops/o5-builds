@@ -52,20 +52,23 @@ func (ss *Publisher) PublishBuildReport(ctx context.Context, msg *builder_pb.Bui
 	return ss.Send(ctx, out)
 }
 
-var headerText = map[builder_pb.BuildStatus]string{
-	builder_pb.BuildStatus_PENDING:  "Build Pending",
-	builder_pb.BuildStatus_PROGRESS: "Build Progress",
-	builder_pb.BuildStatus_FAILURE:  "Build Failed",
-	builder_pb.BuildStatus_SUCCESS:  "Build Success",
+var statusText = map[builder_pb.BuildStatus]string{
+	builder_pb.BuildStatus_PENDING:  "Pending",
+	builder_pb.BuildStatus_PROGRESS: "Progress",
+	builder_pb.BuildStatus_FAILURE:  "Failed",
+	builder_pb.BuildStatus_SUCCESS:  "Success",
 }
 
 func buildReport(msg *builder_pb.BuildReport) *SlackMessage {
 
-	headerText, ok := headerText[msg.Status]
+	headerText, ok := statusText[msg.Status]
 	if !ok {
 		headerText = fmt.Sprintf("Build Status: %s", msg.Status.ShortString())
 	}
-	return &SlackMessage{
+
+	headerText = fmt.Sprintf("%s: %s", msg.Build.Name, headerText)
+
+	outMsg := &SlackMessage{
 		Blocks: []map[string]interface{}{{
 			"type": "header",
 			"text": map[string]interface{}{
@@ -92,4 +95,13 @@ func buildReport(msg *builder_pb.BuildReport) *SlackMessage {
 			}},
 		}},
 	}
+
+	if msg.Output != nil {
+		outMsg.Blocks = append(outMsg.Blocks, map[string]interface{}{
+			"type": "mrkdwn",
+			"text": fmt.Sprintf("*Output:*\n%s", msg.Output.Summary),
+		})
+	}
+
+	return outMsg
 }
