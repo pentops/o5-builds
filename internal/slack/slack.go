@@ -98,8 +98,11 @@ func buildReport(msg *builder_pb.BuildReport) *SlackMessage {
 
 	if msg.Output != nil {
 		outMsg.Blocks = append(outMsg.Blocks, map[string]interface{}{
-			"type": "mrkdwn",
-			"text": fmt.Sprintf("*Output:*\n%s", msg.Output.Summary),
+			"type": "section",
+			"fields": []map[string]interface{}{{
+				"type": "mrkdwn",
+				"text": fmt.Sprintf("*Output:*\n%s", msg.Output.Summary),
+			}},
 		})
 	}
 
