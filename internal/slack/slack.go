@@ -43,6 +43,10 @@ func (ss *Publisher) Send(ctx context.Context, msg *SlackMessage) error {
 	body, _ := io.ReadAll(res.Body)
 
 	if res.StatusCode != http.StatusOK {
+		log.WithFields(ctx, map[string]interface{}{
+			"status": res.StatusCode,
+			"req":    string(json),
+		}).Error("Failed to send slack message")
 		return fmt.Errorf("got status code %d: %s", res.StatusCode, string(body))
 	}
 	return nil
@@ -113,10 +117,10 @@ func buildReport(msg *builder_pb.BuildReport) *SlackMessage {
 
 			outMsg.Blocks = append(outMsg.Blocks, map[string]interface{}{
 				"type": "section",
-				"text": []map[string]interface{}{{
+				"text": map[string]interface{}{
 					"type": "mrkdwn",
 					"text": txt,
-				}},
+				},
 			})
 		}
 	}
