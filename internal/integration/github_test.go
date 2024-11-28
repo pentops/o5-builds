@@ -12,15 +12,13 @@ import (
 	"github.com/pentops/flowtest"
 	"github.com/pentops/golib/gl"
 	"github.com/pentops/j5build/gen/j5/config/v1/config_j5pb"
-	"github.com/pentops/o5-builds/gen/j5/builds/builder/v1/builder_pb"
-	"github.com/pentops/o5-builds/gen/j5/builds/builder/v1/builder_tpb"
 	"github.com/pentops/o5-builds/gen/j5/builds/github/v1/github_pb"
 	"github.com/pentops/o5-builds/gen/j5/builds/github/v1/github_spb"
 	"github.com/pentops/o5-builds/internal/integration/mocks"
 	"github.com/pentops/o5-deploy-aws/gen/o5/aws/deployer/v1/awsdeployer_tpb"
 	"github.com/pentops/o5-messaging/outbox/outboxtest"
 	"github.com/pentops/realms/j5auth"
-	"github.com/pentops/registry/gen/j5/registry/registry/v1/registry_tpb"
+	"github.com/pentops/registry/gen/j5/registry/v1/registry_tpb"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/proto"
 )
@@ -211,9 +209,9 @@ func TestJ5Trigger(t *testing.T) {
 
 	flow.Step("J5 Reply", func(ctx context.Context, t flowtest.Asserter) {
 		t.Logf("buildAPI: %v", buildRoot.Request)
-		_, err := uu.BuilderReply.BuildStatus(ctx, &builder_tpb.BuildStatusMessage{
+		_, err := uu.RegistryReply.J5BuildStatus(ctx, &registry_tpb.J5BuildStatusMessage{
 			Request: buildRoot.Request,
-			Status:  builder_pb.BuildStatus_BUILD_STATUS_SUCCESS,
+			Status:  registry_tpb.BuildStatus_BUILD_STATUS_SUCCESS,
 		})
 		t.NoError(err)
 

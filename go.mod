@@ -24,7 +24,7 @@ require (
 	github.com/pentops/pgtest.go v0.0.0-20240806042712-cca5bdfe6542
 	github.com/pentops/protostate v0.0.0-20241120031731-89487e2fca11
 	github.com/pentops/realms v0.0.0-20241028160728-d07031164df3
-	github.com/pentops/registry v0.0.0-20241120073645-acf55681d7ff
+	github.com/pentops/registry v0.0.0-20241128071635-7d6c9e6588e8
 	github.com/pentops/runner v0.0.0-20241117231504-8174ef5b83e7
 	github.com/pentops/sqrlx.go v0.0.0-20240806064322-33adc0ac5bd4
 	github.com/pressly/goose v2.7.0+incompatible

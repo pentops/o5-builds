@@ -8,11 +8,12 @@ import (
 
 	"github.com/pentops/flowtest"
 	"github.com/pentops/log.go/log"
-	"github.com/pentops/o5-builds/gen/j5/builds/builder/v1/builder_tpb"
 	"github.com/pentops/o5-builds/gen/j5/builds/github/v1/github_spb"
 	"github.com/pentops/o5-builds/internal/app"
 	"github.com/pentops/o5-builds/internal/integration/mocks"
 	"github.com/pentops/o5-messaging/gen/o5/messaging/v1/messaging_tpb"
+	"github.com/pentops/registry/gen/j5/registry/v1/registry_tpb"
+
 	"github.com/pentops/o5-messaging/outbox/outboxtest"
 	"github.com/pentops/pgtest.go/pgtest"
 	"github.com/pentops/sqrlx.go/sqrlx"
@@ -21,10 +22,10 @@ import (
 type Universe struct {
 	Outbox *outboxtest.OutboxAsserter
 
-	RepoCommand  github_spb.RepoCommandServiceClient
-	RepoQuery    github_spb.RepoQueryServiceClient
-	RawTopic     messaging_tpb.RawMessageTopicClient
-	BuilderReply builder_tpb.BuilderReplyTopicClient
+	RepoCommand   github_spb.RepoCommandServiceClient
+	RepoQuery     github_spb.RepoQueryServiceClient
+	RawTopic      messaging_tpb.RawMessageTopicClient
+	RegistryReply registry_tpb.BuildReplyTopicClient
 
 	Github *mocks.GithubMock
 }
@@ -72,7 +73,7 @@ func setupUniverse(ctx context.Context, t flowtest.Asserter, uu *Universe) {
 	uu.RawTopic = messaging_tpb.NewRawMessageTopicClient(grpcPair.Client)
 	uu.RepoCommand = github_spb.NewRepoCommandServiceClient(grpcPair.Client)
 	uu.RepoQuery = github_spb.NewRepoQueryServiceClient(grpcPair.Client)
-	uu.BuilderReply = builder_tpb.NewBuilderReplyTopicClient(grpcPair.Client)
+	uu.RegistryReply = registry_tpb.NewBuildReplyTopicClient(grpcPair.Client)
 
 	grpcPair.ServeUntilDone(t, ctx)
 }

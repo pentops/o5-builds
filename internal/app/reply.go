@@ -6,8 +6,8 @@ import (
 
 	"github.com/pentops/log.go/log"
 	"github.com/pentops/o5-builds/gen/j5/builds/builder/v1/builder_pb"
-	"github.com/pentops/o5-builds/gen/j5/builds/builder/v1/builder_tpb"
 	"github.com/pentops/o5-deploy-aws/gen/o5/aws/deployer/v1/awsdeployer_tpb"
+	"github.com/pentops/registry/gen/j5/registry/v1/registry_tpb"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -16,7 +16,7 @@ import (
 type ReplyWorker struct {
 	publishers []IBuildPublisher
 
-	builder_tpb.UnimplementedBuilderReplyTopicServer
+	registry_tpb.UnimplementedBuildReplyTopicServer
 	awsdeployer_tpb.UnimplementedDeploymentReplyTopicServer
 }
 
@@ -31,11 +31,17 @@ func NewReplyWorker(publishers ...IBuildPublisher) (*ReplyWorker, error) {
 }
 
 func (rw *ReplyWorker) RegisterGRPC(srv *grpc.Server) {
-	builder_tpb.RegisterBuilderReplyTopicServer(srv, rw)
+	registry_tpb.RegisterBuildReplyTopicServer(srv, rw)
 	awsdeployer_tpb.RegisterDeploymentReplyTopicServer(srv, rw)
 }
 
-func (ww *ReplyWorker) BuildStatus(ctx context.Context, message *builder_tpb.BuildStatusMessage) (*emptypb.Empty, error) {
+var j5StatusMap = map[registry_tpb.BuildStatus]builder_pb.BuildStatus{
+	registry_tpb.BuildStatus_BUILD_STATUS_FAILURE:     builder_pb.BuildStatus_BUILD_STATUS_FAILURE,
+	registry_tpb.BuildStatus_BUILD_STATUS_IN_PROGRESS: builder_pb.BuildStatus_BUILD_STATUS_PROGRESS,
+	registry_tpb.BuildStatus_BUILD_STATUS_SUCCESS:     builder_pb.BuildStatus_BUILD_STATUS_SUCCESS,
+}
+
+func (ww *ReplyWorker) J5BuildStatus(ctx context.Context, message *registry_tpb.J5BuildStatusMessage) (*emptypb.Empty, error) {
 
 	log.WithFields(ctx, map[string]interface{}{
 		"gh-status":  message.Status,
@@ -48,10 +54,21 @@ func (ww *ReplyWorker) BuildStatus(ctx context.Context, message *builder_tpb.Bui
 		return nil, fmt.Errorf("unmarshal check context: %w", err)
 	}
 
+	status, ok := j5StatusMap[message.Status]
+	if !ok {
+		return nil, fmt.Errorf("unknown status: %v", message.Status)
+	}
+
 	rep := &builder_pb.BuildReport{
 		Build:  buildContext,
-		Status: message.Status,
-		Output: message.Output,
+		Status: status,
+	}
+	if message.Output != nil {
+		rep.Output = &builder_pb.Output{
+			Title:   message.Output.Title,
+			Summary: message.Output.Summary,
+			Text:    message.Output.Text,
+		}
 	}
 
 	for _, publisher := range ww.publishers {

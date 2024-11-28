@@ -19,7 +19,7 @@ import (
 	"github.com/pentops/o5-deploy-aws/gen/o5/aws/deployer/v1/awsdeployer_tpb"
 	"github.com/pentops/o5-messaging/gen/o5/messaging/v1/messaging_tpb"
 	"github.com/pentops/o5-messaging/o5msg"
-	"github.com/pentops/registry/gen/j5/registry/registry/v1/registry_tpb"
+	"github.com/pentops/registry/gen/j5/registry/v1/registry_tpb"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 )
