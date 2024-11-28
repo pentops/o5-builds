@@ -40,7 +40,8 @@ runtimes:
       - name: "github:push"
         rawMessage: true
 
-      - name: "/o5.deployer.v1.topic.DeploymentReplyTopic"
+      - name: "/o5.aws.deployer.v1.topic.DeploymentReplyTopic"
+      - name: "/j5.registry.builder.v1.topic.BuilderReplyTopic"
 
     containers:
       - name: main
