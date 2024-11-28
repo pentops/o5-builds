@@ -62,3 +62,42 @@ func (ww *ReplyWorker) BuildStatus(ctx context.Context, message *builder_tpb.Bui
 
 	return &emptypb.Empty{}, nil
 }
+
+var o5StatusMap = map[awsdeployer_tpb.DeploymentStatus]builder_pb.BuildStatus{}
+
+func (ww *ReplyWorker) DeploymentStatus(ctx context.Context, message *awsdeployer_tpb.DeploymentStatusMessage) (*emptypb.Empty, error) {
+
+	log.WithFields(ctx, map[string]interface{}{
+		"gh-status": message.Status,
+	}).Debug("BuildStatus")
+
+	buildContext := &builder_pb.BuildContext{}
+	err := protojson.Unmarshal(message.Request.Context, buildContext)
+	if err != nil {
+		return nil, fmt.Errorf("unmarshal check context: %w", err)
+	}
+
+	mappedStatus, ok := o5StatusMap[message.Status]
+	if !ok {
+		return nil, fmt.Errorf("unknown status: %v", message.Status)
+	}
+
+	rep := &builder_pb.BuildReport{
+		Build:  buildContext,
+		Status: mappedStatus,
+	}
+	if message.Message != "" {
+		rep.Output = &builder_pb.Output{
+			Title:   "Detail",
+			Summary: message.Message,
+		}
+	}
+
+	for _, publisher := range ww.publishers {
+		if err := publisher.PublishBuildReport(ctx, rep); err != nil {
+			return nil, fmt.Errorf("publish build report: %w", err)
+		}
+	}
+
+	return &emptypb.Empty{}, nil
+}
