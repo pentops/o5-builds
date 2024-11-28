@@ -113,7 +113,7 @@ func buildReport(msg *builder_pb.BuildReport) *SlackMessage {
 
 			outMsg.Blocks = append(outMsg.Blocks, map[string]interface{}{
 				"type": "section",
-				"fields": []map[string]interface{}{{
+				"text": []map[string]interface{}{{
 					"type": "mrkdwn",
 					"text": txt,
 				}},
