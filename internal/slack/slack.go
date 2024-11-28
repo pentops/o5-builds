@@ -53,9 +53,10 @@ func (ss *Publisher) PublishBuildReport(ctx context.Context, msg *builder_pb.Bui
 }
 
 var headerText = map[builder_pb.BuildStatus]string{
-	builder_pb.BuildStatus_IN_PROGRESS: "Build Started",
-	builder_pb.BuildStatus_FAILURE:     "Build Failed",
-	builder_pb.BuildStatus_SUCCESS:     "Build Succeeded",
+	builder_pb.BuildStatus_PENDING:  "Build Pending",
+	builder_pb.BuildStatus_PROGRESS: "Build Progress",
+	builder_pb.BuildStatus_FAILURE:  "Build Failed",
+	builder_pb.BuildStatus_SUCCESS:  "Build Success",
 }
 
 func buildReport(msg *builder_pb.BuildReport) *SlackMessage {

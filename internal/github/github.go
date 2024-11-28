@@ -125,7 +125,10 @@ func (cl Client) CreateCheckRun(ctx context.Context, ref *github_pb.Commit, name
 
 	if buildReport != nil {
 		switch buildReport.Status {
-		case builder_pb.BuildStatus_IN_PROGRESS:
+		case builder_pb.BuildStatus_PENDING:
+			opts.Status = gl.Ptr(CheckRunStatusQueued)
+
+		case builder_pb.BuildStatus_PROGRESS:
 			opts.Status = gl.Ptr(CheckRunStatusInProgress)
 
 		case builder_pb.BuildStatus_FAILURE:
@@ -192,7 +195,10 @@ func (cl Client) PublishBuildReport(ctx context.Context, msg *builder_pb.BuildRe
 	}
 
 	switch msg.Status {
-	case builder_pb.BuildStatus_IN_PROGRESS:
+	case builder_pb.BuildStatus_PENDING:
+		opts.Status = gl.Ptr(CheckRunStatusQueued)
+
+	case builder_pb.BuildStatus_PROGRESS:
 		opts.Status = gl.Ptr(CheckRunStatusInProgress)
 
 	case builder_pb.BuildStatus_FAILURE:

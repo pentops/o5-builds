@@ -63,7 +63,12 @@ func (ww *ReplyWorker) BuildStatus(ctx context.Context, message *builder_tpb.Bui
 	return &emptypb.Empty{}, nil
 }
 
-var o5StatusMap = map[awsdeployer_tpb.DeploymentStatus]builder_pb.BuildStatus{}
+var o5StatusMap = map[awsdeployer_tpb.DeploymentStatus]builder_pb.BuildStatus{
+	awsdeployer_tpb.DeploymentStatus_FAILED:      builder_pb.BuildStatus_BUILD_STATUS_FAILURE,
+	awsdeployer_tpb.DeploymentStatus_IN_PROGRESS: builder_pb.BuildStatus_BUILD_STATUS_PROGRESS,
+	awsdeployer_tpb.DeploymentStatus_PENDING:     builder_pb.BuildStatus_BUILD_STATUS_PENDING,
+	awsdeployer_tpb.DeploymentStatus_SUCCESS:     builder_pb.BuildStatus_BUILD_STATUS_SUCCESS,
+}
 
 func (ww *ReplyWorker) DeploymentStatus(ctx context.Context, message *awsdeployer_tpb.DeploymentStatusMessage) (*emptypb.Empty, error) {
 
@@ -90,6 +95,10 @@ func (ww *ReplyWorker) DeploymentStatus(ctx context.Context, message *awsdeploye
 		rep.Output = &builder_pb.Output{
 			Title:   "Detail",
 			Summary: message.Message,
+		}
+	} else {
+		rep.Output = &builder_pb.Output{
+			Title: fmt.Sprintf("Status: %s", message.Status.ShortString()),
 		}
 	}
 
