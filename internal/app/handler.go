@@ -146,11 +146,11 @@ func (ww *GithubHandler) addBuildContext(ctx context.Context, commit *github_pb.
 	for _, task := range tasks {
 		cc := &builder_pb.BuildContext{
 			Commit: commit,
-			Name:   task.name,
+			Name:   task.label,
 		}
 
 		if runGithubChecks {
-			checkRun, err := ww.github.CreateCheckRun(ctx, commit, task.name, nil)
+			checkRun, err := ww.github.CreateCheckRun(ctx, commit, task.uniqueName, nil)
 			if err != nil {
 				return fmt.Errorf("create check run: %w", err)
 			}
@@ -203,8 +203,9 @@ type taskMessage interface {
 }
 
 type buildTask struct {
-	name    string
-	message taskMessage
+	uniqueName string
+	label      string
+	message    taskMessage
 }
 
 func (ww *GithubHandler) buildTarget(ctx context.Context, commit *github_pb.Commit, target *github_pb.DeployTargetType) error {
@@ -251,16 +252,16 @@ func (ww *GithubHandler) buildTargets(ctx context.Context, commit *github_pb.Com
 		}
 		for _, apiBuild := range builds.APIBuilds {
 			buildMessages = append(buildMessages, &buildTask{
-				name:    "j5-image",
-				message: apiBuild,
+				uniqueName: "j5-image",
+				label:      "J5 Image",
+				message:    apiBuild,
 			})
 		}
 
 		for _, protoBuild := range builds.ProtoBuilds {
-			checkRunName := fmt.Sprintf("j5-proto-%s", protoBuild.Name)
 			buildMessages = append(buildMessages, &buildTask{
-				name:    checkRunName,
-				message: protoBuild,
+				uniqueName: fmt.Sprintf("j5-proto-%s", protoBuild.Name),
+				message:    protoBuild,
 			})
 		}
 	}
@@ -272,10 +273,10 @@ func (ww *GithubHandler) buildTargets(ctx context.Context, commit *github_pb.Com
 		}
 
 		for _, build := range builds {
-			checkName := fmt.Sprintf("o5-deploy-%s", build.EnvironmentId)
 			buildMessages = append(buildMessages, &buildTask{
-				name:    checkName,
-				message: build,
+				uniqueName: fmt.Sprintf("o5-deploy-%s", build.EnvironmentId),
+				label:      "O5 Deploy",
+				message:    build,
 			})
 		}
 	}

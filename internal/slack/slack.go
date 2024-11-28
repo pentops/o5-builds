@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/pentops/golib/gl"
 	"github.com/pentops/log.go/log"
@@ -63,10 +64,10 @@ func buildReport(msg *builder_pb.BuildReport) *SlackMessage {
 
 	headerText, ok := statusText[msg.Status]
 	if !ok {
-		headerText = fmt.Sprintf("Build Status: %s", msg.Status.ShortString())
+		headerText = msg.Status.ShortString()
 	}
 
-	headerText = fmt.Sprintf("%s: %s", msg.Build.Name, headerText)
+	headerText = fmt.Sprintf("%s %s: %s", msg.Build.Commit.Repo, msg.Build.Name, headerText)
 
 	outMsg := &SlackMessage{
 		Blocks: []map[string]interface{}{{
@@ -97,13 +98,27 @@ func buildReport(msg *builder_pb.BuildReport) *SlackMessage {
 	}
 
 	if msg.Output != nil {
-		outMsg.Blocks = append(outMsg.Blocks, map[string]interface{}{
-			"type": "section",
-			"fields": []map[string]interface{}{{
-				"type": "mrkdwn",
-				"text": fmt.Sprintf("*Output:*\n%s", msg.Output.Summary),
-			}},
-		})
+		lines := []string{}
+		if msg.Output.Title != "" {
+			lines = append(lines, fmt.Sprintf("*%s*", msg.Output.Title))
+		}
+		if msg.Output.Summary != "" {
+			lines = append(lines, msg.Output.Summary)
+		} else if msg.Output.Text != nil {
+			lines = append(lines, *msg.Output.Text)
+		}
+
+		if len(lines) > 0 {
+			txt := strings.Join(lines, "\n")
+
+			outMsg.Blocks = append(outMsg.Blocks, map[string]interface{}{
+				"type": "section",
+				"fields": []map[string]interface{}{{
+					"type": "mrkdwn",
+					"text": txt,
+				}},
+			})
+		}
 	}
 
 	return outMsg
