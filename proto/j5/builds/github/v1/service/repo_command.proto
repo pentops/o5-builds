@@ -45,4 +45,6 @@ message TriggerRequest {
   j5.builds.github.v1.DeployTargetType target = 4;
 }
 
-message TriggerResponse {}
+message TriggerResponse {
+  repeated string targets = 1;
+}

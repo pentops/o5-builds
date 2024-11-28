@@ -13,8 +13,6 @@ import (
 	"github.com/pentops/realms/j5auth"
 	"github.com/pentops/sqrlx.go/sqrlx"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 type GithubCommandService struct {
@@ -23,7 +21,7 @@ type GithubCommandService struct {
 	stateMachines *state.StateMachines
 	*github_spb.UnimplementedRepoCommandServiceServer
 
-	builder targetBuilder
+	builder *GithubHandler
 	refs    RefMatcher
 
 	githubLookup GithubLookup
@@ -33,11 +31,7 @@ type GithubLookup interface {
 	BranchHead(context.Context, *github_pb.Commit) (string, error)
 }
 
-type targetBuilder interface {
-	buildTarget(ctx context.Context, ref *github_pb.Commit, target *github_pb.DeployTargetType) error
-}
-
-func NewGithubCommandService(db sqrlx.Transactor, sm *state.StateMachines, builder targetBuilder, lookup GithubLookup) (*GithubCommandService, error) {
+func NewGithubCommandService(db sqrlx.Transactor, sm *state.StateMachines, builder *GithubHandler, lookup GithubLookup) (*GithubCommandService, error) {
 
 	refs, err := NewRefStore(db)
 	if err != nil {
@@ -92,17 +86,9 @@ func (ss *GithubCommandService) Trigger(ctx context.Context, req *github_spb.Tri
 		return nil, err
 	}
 
-	repo, err := ss.refs.GetRepo(ctx, req.Owner, req.Repo)
-	if err != nil {
-		return nil, fmt.Errorf("get repo: %w", err)
-	}
-	if repo == nil {
-		return nil, status.Error(codes.NotFound, "repo not found")
-	}
-
 	ref := &github_pb.Commit{
-		Owner: repo.Keys.Owner,
-		Repo:  repo.Keys.Name,
+		Owner: req.Owner,
+		Repo:  req.Repo,
 		Sha:   req.Commit,
 	}
 
@@ -115,10 +101,29 @@ func (ss *GithubCommandService) Trigger(ctx context.Context, req *github_spb.Tri
 		ref.Sha = sha
 	}
 
+	buildMessages, err := ss.builder.buildTargets(ctx, ref, []*github_pb.DeployTargetType{req.Target})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, msg := range buildMessages {
+		err := ss.builder.publisher.Publish(ctx, msg.message)
+		if err != nil {
+			return nil, fmt.Errorf("publish: %w", err)
+		}
+	}
+
 	err = ss.builder.buildTarget(ctx, ref, req.Target)
 	if err != nil {
 		return nil, fmt.Errorf("build targets: %w", err)
 	}
 
-	return &github_spb.TriggerResponse{}, nil
+	targets := make([]string, len(buildMessages))
+	for i, msg := range buildMessages {
+		targets[i] = msg.label
+	}
+
+	return &github_spb.TriggerResponse{
+		Targets: targets,
+	}, nil
 }
