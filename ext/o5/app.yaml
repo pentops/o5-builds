@@ -41,7 +41,7 @@ runtimes:
         rawMessage: true
 
       - name: "/o5.aws.deployer.v1.topic.DeploymentReplyTopic"
-      - name: "/j5.registry.builder.v1.topic.BuilderReplyTopic"
+      - name: "/j5.registry.v1.topic.BuildReplyTopic"
 
     containers:
       - name: main

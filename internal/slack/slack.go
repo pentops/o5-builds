@@ -15,9 +15,29 @@ import (
 )
 
 type SlackMessage struct {
-	Text   string                   `json:"text"`
-	Blocks []map[string]interface{} `json:"blocks,omitempty"`
+	Text   string       `json:"text"`
+	Blocks []SlackBlock `json:"blocks,omitempty"`
 }
+
+type SlackBlock struct {
+	Type   string      `json:"type"`
+	Text   *SlackText  `json:"text,omitempty"`
+	Fields []SlackText `json:"fields,omitempty"`
+}
+
+type SlackText struct {
+	Type string `json:"type"`
+	Text string `json:"text"`
+}
+
+const (
+	PlainText = "plain_text"
+	Markdown  = "mrkdwn"
+
+	TypeHeader  = "header"
+	TypeSection = "section"
+	TypeDivider = "divider"
+)
 
 type Publisher struct {
 	URL string
@@ -74,32 +94,32 @@ func buildReport(msg *builder_pb.BuildReport) *SlackMessage {
 	headerText = fmt.Sprintf("%s %s: %s", msg.Build.Commit.Repo, msg.Build.Name, headerText)
 
 	outMsg := &SlackMessage{
-		Blocks: []map[string]interface{}{{
-			"type": "header",
-			"text": map[string]interface{}{
-				"type": "plain_text",
-				"text": headerText,
+		Blocks: []SlackBlock{{
+			Type: TypeHeader,
+			Text: &SlackText{
+				Type: PlainText,
+				Text: headerText,
 			},
 		}, {
-			"type": "section",
-			"fields": []map[string]interface{}{{
-				"type": "mrkdwn",
-				"text": fmt.Sprintf("*Repo:*\n%s/%s", msg.Build.Commit.Owner, msg.Build.Commit.Repo),
+			Type: TypeSection,
+			Fields: []SlackText{{
+				Type: Markdown,
+				Text: fmt.Sprintf("*Repo:*\n%s/%s", msg.Build.Commit.Owner, msg.Build.Commit.Repo),
 			}, {
-				"type": "mrkdwn",
-				"text": fmt.Sprintf("*Branch:*\n%s", gl.Coalesce("", msg.Build.Commit.Ref)),
+				Type: Markdown,
+				Text: fmt.Sprintf("*Branch:*\n%s", gl.Coalesce("", msg.Build.Commit.Ref)),
 			}},
 		}, {
-			"type": "section",
-			"fields": []map[string]interface{}{{
-				"type": "mrkdwn",
-				"text": fmt.Sprintf("*Commit:*\n%s", msg.Build.Commit.Sha),
+			Type: TypeSection,
+			Fields: []SlackText{{
+				Type: Markdown,
+				Text: fmt.Sprintf("*Commit:*\n%s", msg.Build.Commit.Sha),
 			}, {
-				"type": "mrkdwn",
-				"text": fmt.Sprintf("*Build:*\n%s", msg.Build.Name),
+				Type: Markdown,
+				Text: fmt.Sprintf("*Build:*\n%s", msg.Build.Name),
 			}},
-		}},
-	}
+		},
+		}}
 
 	if msg.Output != nil {
 		lines := []string{}
@@ -115,15 +135,19 @@ func buildReport(msg *builder_pb.BuildReport) *SlackMessage {
 		if len(lines) > 0 {
 			txt := strings.Join(lines, "\n")
 
-			outMsg.Blocks = append(outMsg.Blocks, map[string]interface{}{
-				"type": "section",
-				"text": map[string]interface{}{
-					"type": "mrkdwn",
-					"text": txt,
+			outMsg.Blocks = append(outMsg.Blocks, SlackBlock{
+				Type: TypeSection,
+				Text: &SlackText{
+					Type: Markdown,
+					Text: txt,
 				},
 			})
 		}
 	}
+
+	outMsg.Blocks = append(outMsg.Blocks, SlackBlock{
+		Type: TypeDivider,
+	})
 
 	return outMsg
 }
