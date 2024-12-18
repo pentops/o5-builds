@@ -92,14 +92,14 @@ func (ss *GithubCommandService) Trigger(ctx context.Context, req *github_spb.Tri
 	}
 
 	if strings.HasPrefix(req.Commit, "refs/") {
+		commit := req.Commit
+		ref.Ref = &commit
 		sha, err := ss.githubLookup.BranchHead(ctx, ref)
 		if err != nil {
 			return nil, fmt.Errorf("get branch head: %w", err)
 		}
 
 		ref.Sha = sha
-		commit := req.Commit
-		ref.Ref = &commit
 	} else {
 		ref.Sha = req.Commit
 	}
