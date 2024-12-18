@@ -89,7 +89,6 @@ func (ss *GithubCommandService) Trigger(ctx context.Context, req *github_spb.Tri
 	ref := &github_pb.Commit{
 		Owner: req.Owner,
 		Repo:  req.Repo,
-		Sha:   req.Commit,
 	}
 
 	if strings.HasPrefix(req.Commit, "refs/") {
@@ -99,6 +98,10 @@ func (ss *GithubCommandService) Trigger(ctx context.Context, req *github_spb.Tri
 		}
 
 		ref.Sha = sha
+		commit := req.Commit
+		ref.Ref = &commit
+	} else {
+		ref.Sha = req.Commit
 	}
 
 	buildMessages, err := ss.builder.buildTargets(ctx, ref, []*github_pb.DeployTargetType{req.Target})
