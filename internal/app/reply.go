@@ -48,6 +48,11 @@ func (ww *ReplyWorker) J5BuildStatus(ctx context.Context, message *registry_tpb.
 		"gh-outcome": message.Output,
 	}).Debug("BuildStatus")
 
+	if message.Request == nil || len(message.Request.Context) == 0 {
+		log.Debug(ctx, "no build context, NOP")
+		return &emptypb.Empty{}, nil
+	}
+
 	buildContext := &builder_pb.BuildContext{}
 	err := protojson.Unmarshal(message.Request.Context, buildContext)
 	if err != nil {
@@ -92,6 +97,11 @@ func (ww *ReplyWorker) DeploymentStatus(ctx context.Context, message *awsdeploye
 	log.WithFields(ctx, map[string]interface{}{
 		"gh-status": message.Status,
 	}).Debug("BuildStatus")
+
+	if message.Request == nil || len(message.Request.Context) == 0 {
+		log.Debug(ctx, "no build context, NOP")
+		return &emptypb.Empty{}, nil
+	}
 
 	buildContext := &builder_pb.BuildContext{}
 	err := protojson.Unmarshal(message.Request.Context, buildContext)
