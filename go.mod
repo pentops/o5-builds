@@ -7,7 +7,6 @@ require (
 	buf.build/go/protoyaml v0.2.0
 	github.com/bradleyfalzon/ghinstallation/v2 v2.12.0
 	github.com/elgris/sqrl v0.0.0-20210727210741-7e0198b30236
-	github.com/golang/protobuf v1.5.4
 	github.com/google/go-github/v47 v47.1.0
 	github.com/google/go-github/v58 v58.0.0
 	github.com/google/uuid v1.6.0
@@ -39,6 +38,7 @@ require (
 	github.com/bufbuild/protovalidate-go v0.7.2 // indirect
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/golang-jwt/jwt/v4 v4.5.1 // indirect
+	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/cel-go v0.21.0 // indirect
 	github.com/google/go-github/v66 v66.0.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
