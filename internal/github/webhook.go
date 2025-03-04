@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/google/go-github/v58/github"
 	"github.com/pentops/o5-builds/gen/j5/builds/github/v1/github_pb"
 	"github.com/pentops/o5-messaging/gen/o5/messaging/v1/messaging_tpb"
@@ -71,13 +70,13 @@ func (ww *WebhookWorker) Raw(ctx context.Context, message *messaging_tpb.RawMess
 
 	switch event := payload.(type) {
 	case *github.PushEvent:
-		return &empty.Empty{}, ww.handlePushEvent(ctx, event)
+		return &emptypb.Empty{}, ww.handlePushEvent(ctx, event)
 
 	case *github.CheckSuiteEvent:
-		return &empty.Empty{}, ww.handleCheckSuiteEvent(ctx, event)
+		return &emptypb.Empty{}, ww.handleCheckSuiteEvent(ctx, event)
 
 	//case *github.CheckRunEvent:
-	//	return &empty.Empty{}, ww.handleCheckRunEvent(ctx, event)
+	//	return &emptypb.Empty{}, ww.handleCheckRunEvent(ctx, event)
 
 	default:
 		return nil, nil
