@@ -11,7 +11,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/pentops/flowtest"
 	"github.com/pentops/golib/gl"
-	"github.com/pentops/j5build/gen/j5/config/v1/config_j5pb"
+	"github.com/pentops/j5/gen/j5/config/v1/config_j5pb"
 	"github.com/pentops/o5-builds/gen/j5/builds/github/v1/github_pb"
 	"github.com/pentops/o5-builds/gen/j5/builds/github/v1/github_spb"
 	"github.com/pentops/o5-builds/internal/integration/mocks"
