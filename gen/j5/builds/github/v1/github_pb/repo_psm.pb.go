@@ -5,6 +5,7 @@ package github_pb
 import (
 	context "context"
 	fmt "fmt"
+
 	psm_j5pb "github.com/pentops/j5/gen/j5/state/v1/psm_j5pb"
 	psm "github.com/pentops/protostate/psm"
 	sqrlx "github.com/pentops/sqrlx.go/sqrlx"
@@ -39,6 +40,24 @@ type RepoPSMEventSpec = psm.EventSpec[
 	RepoPSMEvent,   // implements psm.IInnerEvent
 ]
 
+type RepoPSMHookBaton = psm.HookBaton[
+	*RepoKeys,      // implements psm.IKeyset
+	*RepoState,     // implements psm.IState
+	RepoStatus,     // implements psm.IStatusEnum
+	*RepoStateData, // implements psm.IStateData
+	*RepoEvent,     // implements psm.IEvent
+	RepoPSMEvent,   // implements psm.IInnerEvent
+]
+
+type RepoPSMFullBaton = psm.CallbackBaton[
+	*RepoKeys,      // implements psm.IKeyset
+	*RepoState,     // implements psm.IState
+	RepoStatus,     // implements psm.IStatusEnum
+	*RepoStateData, // implements psm.IStateData
+	*RepoEvent,     // implements psm.IEvent
+	RepoPSMEvent,   // implements psm.IInnerEvent
+]
+
 type RepoPSMEventKey = string
 
 const (
@@ -59,8 +78,8 @@ func (msg *RepoKeys) PSMIsSet() bool {
 func (msg *RepoKeys) PSMFullName() string {
 	return "j5.builds.github.v1.repo"
 }
-func (msg *RepoKeys) PSMKeyValues() (map[string]string, error) {
-	keyset := map[string]string{
+func (msg *RepoKeys) PSMKeyValues() (map[string]any, error) {
+	keyset := map[string]any{
 		"owner": msg.Owner,
 		"name":  msg.Name,
 	}
@@ -232,6 +251,7 @@ func RepoPSMBuilder() *psm.StateMachineConfig[
 	]{}
 }
 
+// RepoPSMMutation runs at the start of a transition to merge the event information into the state data object. The state object is mutable in this context.
 func RepoPSMMutation[SE RepoPSMEvent](cb func(*RepoStateData, SE) error) psm.TransitionMutation[
 	*RepoKeys,      // implements psm.IKeyset
 	*RepoState,     // implements psm.IState
@@ -252,83 +272,55 @@ func RepoPSMMutation[SE RepoPSMEvent](cb func(*RepoStateData, SE) error) psm.Tra
 	](cb)
 }
 
-type RepoPSMHookBaton = psm.HookBaton[
+// RepoPSMLogicHook runs after the mutation is complete. This hook can trigger side effects, including chained events, which are additional events processed by the state machine. Use this for Business Logic which determines the 'next step' in processing.
+func RepoPSMLogicHook[
+	SE RepoPSMEvent,
+](
+	cb func(
+		context.Context,
+		RepoPSMHookBaton,
+		*RepoState,
+		SE,
+	) error) psm.TransitionHook[
 	*RepoKeys,      // implements psm.IKeyset
 	*RepoState,     // implements psm.IState
 	RepoStatus,     // implements psm.IStatusEnum
 	*RepoStateData, // implements psm.IStateData
 	*RepoEvent,     // implements psm.IEvent
 	RepoPSMEvent,   // implements psm.IInnerEvent
-]
-
-func RepoPSMLogicHook[SE RepoPSMEvent](cb func(context.Context, RepoPSMHookBaton, *RepoState, SE) error) psm.TransitionLogicHook[
-	*RepoKeys,      // implements psm.IKeyset
-	*RepoState,     // implements psm.IState
-	RepoStatus,     // implements psm.IStatusEnum
-	*RepoStateData, // implements psm.IStateData
-	*RepoEvent,     // implements psm.IEvent
-	RepoPSMEvent,   // implements psm.IInnerEvent
-	SE,             // Specific event type for the transition
 ] {
-	return psm.TransitionLogicHook[
+	eventType := (*new(SE)).PSMEventKey()
+	return psm.TransitionHook[
 		*RepoKeys,      // implements psm.IKeyset
 		*RepoState,     // implements psm.IState
 		RepoStatus,     // implements psm.IStatusEnum
 		*RepoStateData, // implements psm.IStateData
 		*RepoEvent,     // implements psm.IEvent
 		RepoPSMEvent,   // implements psm.IInnerEvent
-		SE,             // Specific event type for the transition
-	](cb)
-}
-func RepoPSMDataHook[SE RepoPSMEvent](cb func(context.Context, sqrlx.Transaction, *RepoState, SE) error) psm.TransitionDataHook[
-	*RepoKeys,      // implements psm.IKeyset
-	*RepoState,     // implements psm.IState
-	RepoStatus,     // implements psm.IStatusEnum
-	*RepoStateData, // implements psm.IStateData
-	*RepoEvent,     // implements psm.IEvent
-	RepoPSMEvent,   // implements psm.IInnerEvent
-	SE,             // Specific event type for the transition
-] {
-	return psm.TransitionDataHook[
-		*RepoKeys,      // implements psm.IKeyset
-		*RepoState,     // implements psm.IState
-		RepoStatus,     // implements psm.IStatusEnum
-		*RepoStateData, // implements psm.IStateData
-		*RepoEvent,     // implements psm.IEvent
-		RepoPSMEvent,   // implements psm.IInnerEvent
-		SE,             // Specific event type for the transition
-	](cb)
-}
-func RepoPSMLinkHook[SE RepoPSMEvent, DK psm.IKeyset, DIE psm.IInnerEvent](
-	linkDestination psm.LinkDestination[DK, DIE],
-	cb func(context.Context, *RepoState, SE, func(DK, DIE)) error,
-) psm.LinkHook[
-	*RepoKeys,      // implements psm.IKeyset
-	*RepoState,     // implements psm.IState
-	RepoStatus,     // implements psm.IStatusEnum
-	*RepoStateData, // implements psm.IStateData
-	*RepoEvent,     // implements psm.IEvent
-	RepoPSMEvent,   // implements psm.IInnerEvent
-	SE,             // Specific event type for the transition
-	DK,             // Destination Keys
-	DIE,            // Destination Inner Event
-] {
-	return psm.LinkHook[
-		*RepoKeys,      // implements psm.IKeyset
-		*RepoState,     // implements psm.IState
-		RepoStatus,     // implements psm.IStatusEnum
-		*RepoStateData, // implements psm.IStateData
-		*RepoEvent,     // implements psm.IEvent
-		RepoPSMEvent,   // implements psm.IInnerEvent
-		SE,             // Specific event type for the transition
-		DK,             // Destination Keys
-		DIE,            // Destination Inner Event
 	]{
-		Derive:      cb,
-		Destination: linkDestination,
+		Callback: func(ctx context.Context, tx sqrlx.Transaction, baton RepoPSMFullBaton, state *RepoState, event *RepoEvent) error {
+			asType, ok := any(event.UnwrapPSMEvent()).(SE)
+			if !ok {
+				name := event.ProtoReflect().Descriptor().FullName()
+				return fmt.Errorf("unexpected event type in transition: %s [IE] does not match [SE] (%T)", name, new(SE))
+			}
+			return cb(ctx, baton, state, asType)
+		},
+		EventType:   eventType,
+		RunOnFollow: false,
 	}
 }
-func RepoPSMGeneralLogicHook(cb func(context.Context, RepoPSMHookBaton, *RepoState, *RepoEvent) error) psm.GeneralLogicHook[
+
+// RepoPSMDataHook runs after the mutations, and can be used to update data in tables which are not controlled as the state machine, e.g. for pre-calculating fields for performance reasons. Use of this hook prevents (future) transaction optimizations, as the transaction state when the function is called must needs to match the processing state, but only for this single transition, unlike the GeneralEventDataHook.
+func RepoPSMDataHook[
+	SE RepoPSMEvent,
+](
+	cb func(
+		context.Context,
+		sqrlx.Transaction,
+		*RepoState,
+		SE,
+	) error) psm.TransitionHook[
 	*RepoKeys,      // implements psm.IKeyset
 	*RepoState,     // implements psm.IState
 	RepoStatus,     // implements psm.IStatusEnum
@@ -336,16 +328,41 @@ func RepoPSMGeneralLogicHook(cb func(context.Context, RepoPSMHookBaton, *RepoSta
 	*RepoEvent,     // implements psm.IEvent
 	RepoPSMEvent,   // implements psm.IInnerEvent
 ] {
-	return psm.GeneralLogicHook[
+	eventType := (*new(SE)).PSMEventKey()
+	return psm.TransitionHook[
 		*RepoKeys,      // implements psm.IKeyset
 		*RepoState,     // implements psm.IState
 		RepoStatus,     // implements psm.IStatusEnum
 		*RepoStateData, // implements psm.IStateData
 		*RepoEvent,     // implements psm.IEvent
 		RepoPSMEvent,   // implements psm.IInnerEvent
-	](cb)
+	]{
+		Callback: func(ctx context.Context, tx sqrlx.Transaction, baton RepoPSMFullBaton, state *RepoState, event *RepoEvent) error {
+			asType, ok := any(event.UnwrapPSMEvent()).(SE)
+			if !ok {
+				name := event.ProtoReflect().Descriptor().FullName()
+				return fmt.Errorf("unexpected event type in transition: %s [IE] does not match [SE] (%T)", name, new(SE))
+			}
+			return cb(ctx, tx, state, asType)
+		},
+		EventType:   eventType,
+		RunOnFollow: true,
+	}
 }
-func RepoPSMGeneralStateDataHook(cb func(context.Context, sqrlx.Transaction, *RepoState) error) psm.GeneralStateDataHook[
+
+// RepoPSMLinkHook runs after the mutation and logic hook, and can be used to link the state machine to other state machines in the same database transaction
+func RepoPSMLinkHook[
+	SE RepoPSMEvent,
+	DK psm.IKeyset,
+	DIE psm.IInnerEvent,
+](
+	linkDestination psm.LinkDestination[DK, DIE],
+	cb func(
+		context.Context,
+		*RepoState,
+		SE,
+		func(DK, DIE),
+	) error) psm.TransitionHook[
 	*RepoKeys,      // implements psm.IKeyset
 	*RepoState,     // implements psm.IState
 	RepoStatus,     // implements psm.IStatusEnum
@@ -353,16 +370,40 @@ func RepoPSMGeneralStateDataHook(cb func(context.Context, sqrlx.Transaction, *Re
 	*RepoEvent,     // implements psm.IEvent
 	RepoPSMEvent,   // implements psm.IInnerEvent
 ] {
-	return psm.GeneralStateDataHook[
+	eventType := (*new(SE)).PSMEventKey()
+	wrapped := func(ctx context.Context, tx sqrlx.Transaction, state *RepoState, event SE, add func(DK, DIE)) error {
+		return cb(ctx, state, event, add)
+	}
+	return psm.TransitionHook[
 		*RepoKeys,      // implements psm.IKeyset
 		*RepoState,     // implements psm.IState
 		RepoStatus,     // implements psm.IStatusEnum
 		*RepoStateData, // implements psm.IStateData
 		*RepoEvent,     // implements psm.IEvent
 		RepoPSMEvent,   // implements psm.IInnerEvent
-	](cb)
+	]{
+		Callback: func(ctx context.Context, tx sqrlx.Transaction, baton RepoPSMFullBaton, state *RepoState, event *RepoEvent) error {
+			return psm.RunLinkHook(ctx, linkDestination, wrapped, tx, state, event)
+		},
+		EventType:   eventType,
+		RunOnFollow: false,
+	}
 }
-func RepoPSMGeneralEventDataHook(cb func(context.Context, sqrlx.Transaction, *RepoState, *RepoEvent) error) psm.GeneralEventDataHook[
+
+// RepoPSMLinkDBHook like LinkHook, but has access to the current transaction for reads only (not enforced), use in place of controller logic to look up existing state.
+func RepoPSMLinkDBHook[
+	SE RepoPSMEvent,
+	DK psm.IKeyset,
+	DIE psm.IInnerEvent,
+](
+	linkDestination psm.LinkDestination[DK, DIE],
+	cb func(
+		context.Context,
+		sqrlx.Transaction,
+		*RepoState,
+		SE,
+		func(DK, DIE),
+	) error) psm.TransitionHook[
 	*RepoKeys,      // implements psm.IKeyset
 	*RepoState,     // implements psm.IState
 	RepoStatus,     // implements psm.IStatusEnum
@@ -370,12 +411,208 @@ func RepoPSMGeneralEventDataHook(cb func(context.Context, sqrlx.Transaction, *Re
 	*RepoEvent,     // implements psm.IEvent
 	RepoPSMEvent,   // implements psm.IInnerEvent
 ] {
-	return psm.GeneralEventDataHook[
+	eventType := (*new(SE)).PSMEventKey()
+	return psm.TransitionHook[
 		*RepoKeys,      // implements psm.IKeyset
 		*RepoState,     // implements psm.IState
 		RepoStatus,     // implements psm.IStatusEnum
 		*RepoStateData, // implements psm.IStateData
 		*RepoEvent,     // implements psm.IEvent
 		RepoPSMEvent,   // implements psm.IInnerEvent
-	](cb)
+	]{
+		Callback: func(ctx context.Context, tx sqrlx.Transaction, baton RepoPSMFullBaton, state *RepoState, event *RepoEvent) error {
+			return psm.RunLinkHook(ctx, linkDestination, cb, tx, state, event)
+		},
+		EventType:   eventType,
+		RunOnFollow: false,
+	}
+}
+
+// RepoPSMGeneralLogicHook runs once per transition at the state-machine level regardless of which transition / event is being processed. It runs exactly once per transition, with the state object in the final state after the transition but prior to processing any further events. Chained events are added to the *end* of the event queue for the transaction, and side effects are published (as always) when the transaction is committed. The function MUST be pure, i.e. It MUST NOT produce any side-effects outside of the HookBaton, and MUST NOT modify the state.
+func RepoPSMGeneralLogicHook(
+	cb func(
+		context.Context,
+		RepoPSMHookBaton,
+		*RepoState,
+		*RepoEvent,
+	) error) psm.GeneralEventHook[
+	*RepoKeys,      // implements psm.IKeyset
+	*RepoState,     // implements psm.IState
+	RepoStatus,     // implements psm.IStatusEnum
+	*RepoStateData, // implements psm.IStateData
+	*RepoEvent,     // implements psm.IEvent
+	RepoPSMEvent,   // implements psm.IInnerEvent
+] {
+	return psm.GeneralEventHook[
+		*RepoKeys,      // implements psm.IKeyset
+		*RepoState,     // implements psm.IState
+		RepoStatus,     // implements psm.IStatusEnum
+		*RepoStateData, // implements psm.IStateData
+		*RepoEvent,     // implements psm.IEvent
+		RepoPSMEvent,   // implements psm.IInnerEvent
+	]{
+		Callback: func(
+			ctx context.Context,
+			tx sqrlx.Transaction,
+			baton RepoPSMFullBaton,
+			state *RepoState,
+			event *RepoEvent,
+		) error {
+			return cb(ctx, baton, state, event)
+		},
+		RunOnFollow: false,
+	}
+}
+
+// RepoPSMGeneralStateDataHook runs at the state-machine level regardless of which transition / event is being processed. It runs at-least once before committing a database transaction after multiple transitions are complete. This hook has access only to the final state after the transitions and is used to update other tables based on the resulting state. It MUST be idempotent, it may be called after injecting externally-held state data.
+func RepoPSMGeneralStateDataHook(
+	cb func(
+		context.Context,
+		sqrlx.Transaction,
+		*RepoState,
+	) error) psm.GeneralStateHook[
+	*RepoKeys,      // implements psm.IKeyset
+	*RepoState,     // implements psm.IState
+	RepoStatus,     // implements psm.IStatusEnum
+	*RepoStateData, // implements psm.IStateData
+	*RepoEvent,     // implements psm.IEvent
+	RepoPSMEvent,   // implements psm.IInnerEvent
+] {
+	return psm.GeneralStateHook[
+		*RepoKeys,      // implements psm.IKeyset
+		*RepoState,     // implements psm.IState
+		RepoStatus,     // implements psm.IStatusEnum
+		*RepoStateData, // implements psm.IStateData
+		*RepoEvent,     // implements psm.IEvent
+		RepoPSMEvent,   // implements psm.IInnerEvent
+	]{
+		Callback: func(
+			ctx context.Context,
+			tx sqrlx.Transaction,
+			baton RepoPSMFullBaton,
+			state *RepoState,
+		) error {
+			return cb(ctx, tx, state)
+		},
+		RunOnFollow: true,
+	}
+}
+
+// RepoPSMGeneralEventDataHook runs after each transition at the state-machine level regardless of which transition / event is being processed. It runs exactly once per transition, before any other events are processed. The presence of this hook type prevents (future) transaction optimizations, so should be used sparingly.
+func RepoPSMGeneralEventDataHook(
+	cb func(
+		context.Context,
+		sqrlx.Transaction,
+		*RepoState,
+		*RepoEvent,
+	) error) psm.GeneralEventHook[
+	*RepoKeys,      // implements psm.IKeyset
+	*RepoState,     // implements psm.IState
+	RepoStatus,     // implements psm.IStatusEnum
+	*RepoStateData, // implements psm.IStateData
+	*RepoEvent,     // implements psm.IEvent
+	RepoPSMEvent,   // implements psm.IInnerEvent
+] {
+	return psm.GeneralEventHook[
+		*RepoKeys,      // implements psm.IKeyset
+		*RepoState,     // implements psm.IState
+		RepoStatus,     // implements psm.IStatusEnum
+		*RepoStateData, // implements psm.IStateData
+		*RepoEvent,     // implements psm.IEvent
+		RepoPSMEvent,   // implements psm.IInnerEvent
+	]{
+		Callback: func(
+			ctx context.Context,
+			tx sqrlx.Transaction,
+			baton RepoPSMFullBaton,
+			state *RepoState,
+			event *RepoEvent,
+		) error {
+			return cb(ctx, tx, state, event)
+		},
+		RunOnFollow: true,
+	}
+}
+
+// RepoPSMEventPublishHook  EventPublishHook runs for each transition, at least once before committing a database transaction after multiple transitions are complete. It should publish a derived version of the event using the publisher.
+func RepoPSMEventPublishHook(
+	cb func(
+		context.Context,
+		psm.Publisher,
+		*RepoState,
+		*RepoEvent,
+	) error) psm.GeneralEventHook[
+	*RepoKeys,      // implements psm.IKeyset
+	*RepoState,     // implements psm.IState
+	RepoStatus,     // implements psm.IStatusEnum
+	*RepoStateData, // implements psm.IStateData
+	*RepoEvent,     // implements psm.IEvent
+	RepoPSMEvent,   // implements psm.IInnerEvent
+] {
+	return psm.GeneralEventHook[
+		*RepoKeys,      // implements psm.IKeyset
+		*RepoState,     // implements psm.IState
+		RepoStatus,     // implements psm.IStatusEnum
+		*RepoStateData, // implements psm.IStateData
+		*RepoEvent,     // implements psm.IEvent
+		RepoPSMEvent,   // implements psm.IInnerEvent
+	]{
+		Callback: func(
+			ctx context.Context,
+			tx sqrlx.Transaction,
+			baton RepoPSMFullBaton,
+			state *RepoState,
+			event *RepoEvent,
+		) error {
+			return cb(ctx, baton, state, event)
+		},
+		RunOnFollow: false,
+	}
+}
+
+// RepoPSMUpsertPublishHook runs for each transition, at least once before committing a database transaction after multiple transitions are complete. It should publish a derived version of the event using the publisher.
+func RepoPSMUpsertPublishHook(
+	cb func(
+		context.Context,
+		psm.Publisher,
+		*RepoState,
+	) error) psm.GeneralStateHook[
+	*RepoKeys,      // implements psm.IKeyset
+	*RepoState,     // implements psm.IState
+	RepoStatus,     // implements psm.IStatusEnum
+	*RepoStateData, // implements psm.IStateData
+	*RepoEvent,     // implements psm.IEvent
+	RepoPSMEvent,   // implements psm.IInnerEvent
+] {
+	return psm.GeneralStateHook[
+		*RepoKeys,      // implements psm.IKeyset
+		*RepoState,     // implements psm.IState
+		RepoStatus,     // implements psm.IStatusEnum
+		*RepoStateData, // implements psm.IStateData
+		*RepoEvent,     // implements psm.IEvent
+		RepoPSMEvent,   // implements psm.IInnerEvent
+	]{
+		Callback: func(
+			ctx context.Context,
+			tx sqrlx.Transaction,
+			baton RepoPSMFullBaton,
+			state *RepoState,
+		) error {
+			return cb(ctx, baton, state)
+		},
+		RunOnFollow: false,
+	}
+}
+
+func (event *RepoEvent) EventPublishMetadata() *psm_j5pb.EventPublishMetadata {
+	tenantKeys := make([]*psm_j5pb.EventTenant, 0)
+	return &psm_j5pb.EventPublishMetadata{
+		EventId:   event.Metadata.EventId,
+		Sequence:  event.Metadata.Sequence,
+		Timestamp: event.Metadata.Timestamp,
+		Cause:     event.Metadata.Cause,
+		Auth: &psm_j5pb.PublishAuth{
+			TenantKeys: tenantKeys,
+		},
+	}
 }
