@@ -10,9 +10,6 @@ import (
 func (msg *GetRepoRequest) Clone() any {
 	return proto.Clone(msg).(*GetRepoRequest)
 }
-
-// j5.builds.github.v1.service is OK for  J5 Methods
-
 func (msg *GetRepoRequest) J5Reflect() j5reflect.Root {
 	return j5reflect.MustReflect(msg.ProtoReflect())
 }
@@ -24,9 +21,6 @@ func (msg *GetRepoRequest) J5Object() j5reflect.Object {
 func (msg *GetRepoResponse) Clone() any {
 	return proto.Clone(msg).(*GetRepoResponse)
 }
-
-// j5.builds.github.v1.service is OK for  J5 Methods
-
 func (msg *GetRepoResponse) J5Reflect() j5reflect.Root {
 	return j5reflect.MustReflect(msg.ProtoReflect())
 }
@@ -38,9 +32,6 @@ func (msg *GetRepoResponse) J5Object() j5reflect.Object {
 func (msg *ListReposRequest) Clone() any {
 	return proto.Clone(msg).(*ListReposRequest)
 }
-
-// j5.builds.github.v1.service is OK for  J5 Methods
-
 func (msg *ListReposRequest) J5Reflect() j5reflect.Root {
 	return j5reflect.MustReflect(msg.ProtoReflect())
 }
@@ -52,9 +43,6 @@ func (msg *ListReposRequest) J5Object() j5reflect.Object {
 func (msg *ListReposResponse) Clone() any {
 	return proto.Clone(msg).(*ListReposResponse)
 }
-
-// j5.builds.github.v1.service is OK for  J5 Methods
-
 func (msg *ListReposResponse) J5Reflect() j5reflect.Root {
 	return j5reflect.MustReflect(msg.ProtoReflect())
 }
@@ -66,9 +54,6 @@ func (msg *ListReposResponse) J5Object() j5reflect.Object {
 func (msg *ListRepoEventsRequest) Clone() any {
 	return proto.Clone(msg).(*ListRepoEventsRequest)
 }
-
-// j5.builds.github.v1.service is OK for  J5 Methods
-
 func (msg *ListRepoEventsRequest) J5Reflect() j5reflect.Root {
 	return j5reflect.MustReflect(msg.ProtoReflect())
 }
@@ -80,9 +65,6 @@ func (msg *ListRepoEventsRequest) J5Object() j5reflect.Object {
 func (msg *ListRepoEventsResponse) Clone() any {
 	return proto.Clone(msg).(*ListRepoEventsResponse)
 }
-
-// j5.builds.github.v1.service is OK for  J5 Methods
-
 func (msg *ListRepoEventsResponse) J5Reflect() j5reflect.Root {
 	return j5reflect.MustReflect(msg.ProtoReflect())
 }

@@ -10,9 +10,6 @@ import (
 func (msg *ConfigureRepoRequest) Clone() any {
 	return proto.Clone(msg).(*ConfigureRepoRequest)
 }
-
-// j5.builds.github.v1.service is OK for  J5 Methods
-
 func (msg *ConfigureRepoRequest) J5Reflect() j5reflect.Root {
 	return j5reflect.MustReflect(msg.ProtoReflect())
 }
@@ -24,9 +21,6 @@ func (msg *ConfigureRepoRequest) J5Object() j5reflect.Object {
 func (msg *ConfigureRepoResponse) Clone() any {
 	return proto.Clone(msg).(*ConfigureRepoResponse)
 }
-
-// j5.builds.github.v1.service is OK for  J5 Methods
-
 func (msg *ConfigureRepoResponse) J5Reflect() j5reflect.Root {
 	return j5reflect.MustReflect(msg.ProtoReflect())
 }
@@ -38,9 +32,6 @@ func (msg *ConfigureRepoResponse) J5Object() j5reflect.Object {
 func (msg *TriggerRequest) Clone() any {
 	return proto.Clone(msg).(*TriggerRequest)
 }
-
-// j5.builds.github.v1.service is OK for  J5 Methods
-
 func (msg *TriggerRequest) J5Reflect() j5reflect.Root {
 	return j5reflect.MustReflect(msg.ProtoReflect())
 }
@@ -52,9 +43,6 @@ func (msg *TriggerRequest) J5Object() j5reflect.Object {
 func (msg *TriggerResponse) Clone() any {
 	return proto.Clone(msg).(*TriggerResponse)
 }
-
-// j5.builds.github.v1.service is OK for  J5 Methods
-
 func (msg *TriggerResponse) J5Reflect() j5reflect.Root {
 	return j5reflect.MustReflect(msg.ProtoReflect())
 }

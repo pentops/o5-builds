@@ -13,9 +13,6 @@ import (
 func (msg *RepoKeys) Clone() any {
 	return proto.Clone(msg).(*RepoKeys)
 }
-
-// j5.builds.github.v1 is OK for  J5 Methods
-
 func (msg *RepoKeys) J5Reflect() j5reflect.Root {
 	return j5reflect.MustReflect(msg.ProtoReflect())
 }
@@ -27,9 +24,6 @@ func (msg *RepoKeys) J5Object() j5reflect.Object {
 func (msg *RepoState) Clone() any {
 	return proto.Clone(msg).(*RepoState)
 }
-
-// j5.builds.github.v1 is OK for  J5 Methods
-
 func (msg *RepoState) J5Reflect() j5reflect.Root {
 	return j5reflect.MustReflect(msg.ProtoReflect())
 }
@@ -41,9 +35,6 @@ func (msg *RepoState) J5Object() j5reflect.Object {
 func (msg *RepoStateData) Clone() any {
 	return proto.Clone(msg).(*RepoStateData)
 }
-
-// j5.builds.github.v1 is OK for  J5 Methods
-
 func (msg *RepoStateData) J5Reflect() j5reflect.Root {
 	return j5reflect.MustReflect(msg.ProtoReflect())
 }
@@ -55,9 +46,6 @@ func (msg *RepoStateData) J5Object() j5reflect.Object {
 func (msg *RepoEvent) Clone() any {
 	return proto.Clone(msg).(*RepoEvent)
 }
-
-// j5.builds.github.v1 is OK for  J5 Methods
-
 func (msg *RepoEvent) J5Reflect() j5reflect.Root {
 	return j5reflect.MustReflect(msg.ProtoReflect())
 }
@@ -130,8 +118,6 @@ func (msg *RepoEventType) Clone() any {
 
 type IsRepoEventType_Type = isRepoEventType_Type
 
-// j5.builds.github.v1 is OK for  J5 Methods
-
 func (msg *RepoEventType) J5Reflect() j5reflect.Root {
 	return j5reflect.MustReflect(msg.ProtoReflect())
 }
@@ -139,9 +125,6 @@ func (msg *RepoEventType) J5Reflect() j5reflect.Root {
 func (msg *RepoEventType_Configure) Clone() any {
 	return proto.Clone(msg).(*RepoEventType_Configure)
 }
-
-// j5.builds.github.v1 is OK for  J5 Methods
-
 func (msg *RepoEventType_Configure) J5Reflect() j5reflect.Root {
 	return j5reflect.MustReflect(msg.ProtoReflect())
 }
@@ -153,9 +136,6 @@ func (msg *RepoEventType_Configure) J5Object() j5reflect.Object {
 func (msg *RepoEventType_ConfigureBranch) Clone() any {
 	return proto.Clone(msg).(*RepoEventType_ConfigureBranch)
 }
-
-// j5.builds.github.v1 is OK for  J5 Methods
-
 func (msg *RepoEventType_ConfigureBranch) J5Reflect() j5reflect.Root {
 	return j5reflect.MustReflect(msg.ProtoReflect())
 }
@@ -167,9 +147,6 @@ func (msg *RepoEventType_ConfigureBranch) J5Object() j5reflect.Object {
 func (msg *RepoEventType_RemoveBranch) Clone() any {
 	return proto.Clone(msg).(*RepoEventType_RemoveBranch)
 }
-
-// j5.builds.github.v1 is OK for  J5 Methods
-
 func (msg *RepoEventType_RemoveBranch) J5Reflect() j5reflect.Root {
 	return j5reflect.MustReflect(msg.ProtoReflect())
 }
@@ -181,9 +158,6 @@ func (msg *RepoEventType_RemoveBranch) J5Object() j5reflect.Object {
 func (msg *Branch) Clone() any {
 	return proto.Clone(msg).(*Branch)
 }
-
-// j5.builds.github.v1 is OK for  J5 Methods
-
 func (msg *Branch) J5Reflect() j5reflect.Root {
 	return j5reflect.MustReflect(msg.ProtoReflect())
 }
@@ -246,8 +220,6 @@ func (msg *DeployTargetType) Clone() any {
 
 type IsDeployTargetType_Type = isDeployTargetType_Type
 
-// j5.builds.github.v1 is OK for  J5 Methods
-
 func (msg *DeployTargetType) J5Reflect() j5reflect.Root {
 	return j5reflect.MustReflect(msg.ProtoReflect())
 }
@@ -255,9 +227,6 @@ func (msg *DeployTargetType) J5Reflect() j5reflect.Root {
 func (msg *DeployTargetType_J5Build) Clone() any {
 	return proto.Clone(msg).(*DeployTargetType_J5Build)
 }
-
-// j5.builds.github.v1 is OK for  J5 Methods
-
 func (msg *DeployTargetType_J5Build) J5Reflect() j5reflect.Root {
 	return j5reflect.MustReflect(msg.ProtoReflect())
 }
@@ -269,9 +238,6 @@ func (msg *DeployTargetType_J5Build) J5Object() j5reflect.Object {
 func (msg *DeployTargetType_O5Build) Clone() any {
 	return proto.Clone(msg).(*DeployTargetType_O5Build)
 }
-
-// j5.builds.github.v1 is OK for  J5 Methods
-
 func (msg *DeployTargetType_O5Build) J5Reflect() j5reflect.Root {
 	return j5reflect.MustReflect(msg.ProtoReflect())
 }

@@ -13,9 +13,6 @@ import (
 func (msg *BuildContext) Clone() any {
 	return proto.Clone(msg).(*BuildContext)
 }
-
-// j5.builds.builder.v1 is OK for  J5 Methods
-
 func (msg *BuildContext) J5Reflect() j5reflect.Root {
 	return j5reflect.MustReflect(msg.ProtoReflect())
 }
@@ -27,9 +24,6 @@ func (msg *BuildContext) J5Object() j5reflect.Object {
 func (msg *BuildReport) Clone() any {
 	return proto.Clone(msg).(*BuildReport)
 }
-
-// j5.builds.builder.v1 is OK for  J5 Methods
-
 func (msg *BuildReport) J5Reflect() j5reflect.Root {
 	return j5reflect.MustReflect(msg.ProtoReflect())
 }
@@ -41,9 +35,6 @@ func (msg *BuildReport) J5Object() j5reflect.Object {
 func (msg *Output) Clone() any {
 	return proto.Clone(msg).(*Output)
 }
-
-// j5.builds.builder.v1 is OK for  J5 Methods
-
 func (msg *Output) J5Reflect() j5reflect.Root {
 	return j5reflect.MustReflect(msg.ProtoReflect())
 }

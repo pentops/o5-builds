@@ -10,9 +10,6 @@ import (
 func (msg *CheckRun) Clone() any {
 	return proto.Clone(msg).(*CheckRun)
 }
-
-// j5.builds.github.v1 is OK for  J5 Methods
-
 func (msg *CheckRun) J5Reflect() j5reflect.Root {
 	return j5reflect.MustReflect(msg.ProtoReflect())
 }
@@ -24,9 +21,6 @@ func (msg *CheckRun) J5Object() j5reflect.Object {
 func (msg *CheckSuite) Clone() any {
 	return proto.Clone(msg).(*CheckSuite)
 }
-
-// j5.builds.github.v1 is OK for  J5 Methods
-
 func (msg *CheckSuite) J5Reflect() j5reflect.Root {
 	return j5reflect.MustReflect(msg.ProtoReflect())
 }
@@ -38,9 +32,6 @@ func (msg *CheckSuite) J5Object() j5reflect.Object {
 func (msg *Commit) Clone() any {
 	return proto.Clone(msg).(*Commit)
 }
-
-// j5.builds.github.v1 is OK for  J5 Methods
-
 func (msg *Commit) J5Reflect() j5reflect.Root {
 	return j5reflect.MustReflect(msg.ProtoReflect())
 }
