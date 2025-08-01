@@ -7,9 +7,9 @@ import (
 	"fmt"
 
 	sq "github.com/elgris/sqrl"
+	"github.com/pentops/j5/lib/j5codec"
 	"github.com/pentops/o5-builds/gen/j5/builds/github/v1/github_pb"
 	"github.com/pentops/sqrlx.go/sqrlx"
-	"google.golang.org/protobuf/encoding/protojson"
 )
 
 type RefStore struct {
@@ -53,7 +53,7 @@ func (rs *RefStore) GetRepo(ctx context.Context, owner string, name string) (*gi
 	}
 
 	repo := &github_pb.RepoState{}
-	if err := protojson.Unmarshal(stateBytes, repo); err != nil {
+	if err := j5codec.Global.JSONToProto(stateBytes, repo.ProtoReflect()); err != nil {
 		return nil, fmt.Errorf("unmarshalling repo state: %w", err)
 	}
 

@@ -267,8 +267,8 @@ func (cl Client) BranchHead(ctx context.Context, ref *github_pb.Commit) (string,
 		return "", fmt.Errorf("no ref or sha")
 	}
 
-	if strings.HasPrefix(*ref.Ref, "refs/heads/") {
-		branch := strings.TrimPrefix(*ref.Ref, "refs/heads/")
+	if after, ok := strings.CutPrefix(*ref.Ref, "refs/heads/"); ok {
+		branch := after
 		rr, _, err := cl.repositories.GetBranch(ctx, ref.Owner, ref.Repo, branch, 1)
 		if err != nil {
 			return "", err

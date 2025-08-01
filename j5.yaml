@@ -13,9 +13,8 @@ generate:
       module: github.com/pentops/o5-builds
     plugins:
       - base: go
-      - base: go-sugar
       - base: go-grpc
-      - base: go-psm
+      - base: go-j5
       - base: go-o5-messaging
 
 managedPaths:
@@ -24,26 +23,25 @@ managedPaths:
 plugins:
   - name: go
     type: PLUGIN_PROTO
-    docker:
-      image: ghcr.io/pentops/protoc-gen-go:v1.32.0
+    opts:
+      module: gopkg.interchangefi.com/go-api
+    runType:
+      docker:
+        image: ghcr.io/pentops/protoc-gen-go:v1.34.2
 
   - name: go-grpc
-    base: go
-    docker:
-      image: ghcr.io/pentops/protoc-gen-go-grpc:v1.3.0
-
-  - name: go-sugar
-    base: go
-    docker:
-      image: ghcr.io/pentops/protoc-gen-go-sugar:b1e769eeea97192209ab5a4e8fc560bf72ce5ba7
-
-  - name: go-psm
-    base: go
-    docker:
-      image: ghcr.io/pentops/protoc-gen-go-protostate:9ecb1e5a4fe19079c85d686f57190ff9a7a8b9da
+    type: PLUGIN_PROTO
+    runType:
+      docker:
+        image: ghcr.io/pentops/protoc-gen-go-grpc:v1.4.0
 
   - name: go-o5-messaging
     base: go
-    docker:
-      image: ghcr.io/pentops/protoc-gen-go-o5-messaging:7e07c29129f03edc9ef01ba4739328625ef24746
+    runType:
+      docker:
+        image: ghcr.io/pentops/protoc-gen-go-o5-messaging:7e07c29129f03edc9ef01ba4739328625ef24746
 
+  - base: go
+    name: go-j5
+    runType:
+      builtin: "go-j5"

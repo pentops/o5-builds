@@ -24,7 +24,7 @@ import (
 )
 
 func withTestActor(ctx context.Context) context.Context {
-	jwt := map[string]interface{}{
+	jwt := map[string]any{
 		"sub":                         "test/" + uuid.NewString(),
 		"claims.pentops.com/tenant":   "test",
 		"claims.pentops.com/tenantid": "test",

@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pentops/j5/lib/j5codec"
 	"github.com/pentops/log.go/log"
 	"github.com/pentops/o5-builds/gen/j5/builds/builder/v1/builder_pb"
 	"github.com/pentops/o5-deploy-aws/gen/o5/aws/deployer/v1/awsdeployer_tpb"
 	"github.com/pentops/registry/gen/j5/registry/v1/registry_tpb"
 	"google.golang.org/grpc"
-	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -43,7 +43,7 @@ var j5StatusMap = map[registry_tpb.BuildStatus]builder_pb.BuildStatus{
 
 func (ww *ReplyWorker) J5BuildStatus(ctx context.Context, message *registry_tpb.J5BuildStatusMessage) (*emptypb.Empty, error) {
 
-	log.WithFields(ctx, map[string]interface{}{
+	log.WithFields(ctx, map[string]any{
 		"gh-status":  message.Status,
 		"gh-outcome": message.Output,
 	}).Debug("BuildStatus")
@@ -54,7 +54,7 @@ func (ww *ReplyWorker) J5BuildStatus(ctx context.Context, message *registry_tpb.
 	}
 
 	buildContext := &builder_pb.BuildContext{}
-	err := protojson.Unmarshal(message.Request.Context, buildContext)
+	err := j5codec.Global.JSONToProto(message.Request.Context, buildContext.ProtoReflect())
 	if err != nil {
 		return nil, fmt.Errorf("unmarshal check context: %w", err)
 	}
@@ -94,7 +94,7 @@ var o5StatusMap = map[awsdeployer_tpb.DeploymentStatus]builder_pb.BuildStatus{
 
 func (ww *ReplyWorker) DeploymentStatus(ctx context.Context, message *awsdeployer_tpb.DeploymentStatusMessage) (*emptypb.Empty, error) {
 
-	log.WithFields(ctx, map[string]interface{}{
+	log.WithFields(ctx, map[string]any{
 		"gh-status": message.Status,
 	}).Debug("BuildStatus")
 
@@ -104,7 +104,7 @@ func (ww *ReplyWorker) DeploymentStatus(ctx context.Context, message *awsdeploye
 	}
 
 	buildContext := &builder_pb.BuildContext{}
-	err := protojson.Unmarshal(message.Request.Context, buildContext)
+	err := j5codec.Global.JSONToProto(message.Request.Context, buildContext.ProtoReflect())
 	if err != nil {
 		return nil, fmt.Errorf("unmarshal check context: %w", err)
 	}

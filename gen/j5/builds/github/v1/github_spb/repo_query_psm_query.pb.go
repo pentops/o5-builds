@@ -4,68 +4,56 @@ package github_spb
 
 import (
 	context "context"
+	fmt "fmt"
 
-	psm "github.com/pentops/protostate/psm"
+	j5reflect "github.com/pentops/j5/lib/j5reflect"
+	j5schema "github.com/pentops/j5/lib/j5schema"
+	psm "github.com/pentops/j5/lib/psm"
 	sqrlx "github.com/pentops/sqrlx.go/sqrlx"
 )
 
 // State Query Service for %sRepo
 // QuerySet is the query set for the Repo service.
 
-type RepoPSMQuerySet = psm.StateQuerySet[
-	*GetRepoRequest,
-	*GetRepoResponse,
-	*ListReposRequest,
-	*ListReposResponse,
-	*ListRepoEventsRequest,
-	*ListRepoEventsResponse,
-]
+type RepoPSMQuerySet = psm.StateQuerySet
 
 func NewRepoPSMQuerySet(
-	smSpec psm.QuerySpec[
-		*GetRepoRequest,
-		*GetRepoResponse,
-		*ListReposRequest,
-		*ListReposResponse,
-		*ListRepoEventsRequest,
-		*ListRepoEventsResponse,
-	],
+	smSpec psm.QuerySpec,
 	options psm.StateQueryOptions,
 ) (*RepoPSMQuerySet, error) {
-	return psm.BuildStateQuerySet[
-		*GetRepoRequest,
-		*GetRepoResponse,
-		*ListReposRequest,
-		*ListReposResponse,
-		*ListRepoEventsRequest,
-		*ListRepoEventsResponse,
-	](smSpec, options)
+	return psm.BuildStateQuerySet(smSpec, options)
 }
 
-type RepoPSMQuerySpec = psm.QuerySpec[
-	*GetRepoRequest,
-	*GetRepoResponse,
-	*ListReposRequest,
-	*ListReposResponse,
-	*ListRepoEventsRequest,
-	*ListRepoEventsResponse,
-]
+type RepoPSMQuerySpec = psm.QuerySpec
 
 func DefaultRepoPSMQuerySpec(tableSpec psm.QueryTableSpec) RepoPSMQuerySpec {
-	return psm.QuerySpec[
-		*GetRepoRequest,
-		*GetRepoResponse,
-		*ListReposRequest,
-		*ListReposResponse,
-		*ListRepoEventsRequest,
-		*ListRepoEventsResponse,
-	]{
+	return psm.QuerySpec{
+		GetMethod: &j5schema.MethodSchema{
+			Request:  j5schema.MustObjectSchema((&GetRepoRequest{}).ProtoReflect().Descriptor()),
+			Response: j5schema.MustObjectSchema((&GetRepoResponse{}).ProtoReflect().Descriptor()),
+		},
+		ListMethod: &j5schema.MethodSchema{
+			Request:  j5schema.MustObjectSchema((&ListReposRequest{}).ProtoReflect().Descriptor()),
+			Response: j5schema.MustObjectSchema((&ListReposResponse{}).ProtoReflect().Descriptor()),
+		},
+		ListEventsMethod: &j5schema.MethodSchema{
+			Request:  j5schema.MustObjectSchema((&ListRepoEventsRequest{}).ProtoReflect().Descriptor()),
+			Response: j5schema.MustObjectSchema((&ListRepoEventsResponse{}).ProtoReflect().Descriptor()),
+		},
 		QueryTableSpec: tableSpec,
-		ListRequestFilter: func(req *ListReposRequest) (map[string]interface{}, error) {
+		ListRequestFilter: func(reqReflect j5reflect.Object) (map[string]interface{}, error) {
+			req, ok := reqReflect.Interface().(*ListReposRequest)
+			if !ok {
+				return nil, fmt.Errorf("expected *ListReposRequest but got %T", req)
+			}
 			filter := map[string]interface{}{}
 			return filter, nil
 		},
-		ListEventsRequestFilter: func(req *ListRepoEventsRequest) (map[string]interface{}, error) {
+		ListEventsRequestFilter: func(reqReflect j5reflect.Object) (map[string]interface{}, error) {
+			req, ok := reqReflect.Interface().(*ListRepoEventsRequest)
+			if !ok {
+				return nil, fmt.Errorf("expected *ListRepoEventsRequest but got %T", req)
+			}
 			filter := map[string]interface{}{}
 			filter["owner"] = req.Owner
 			filter["name"] = req.Name
@@ -91,7 +79,7 @@ func NewRepoQueryServiceImpl(db sqrlx.Transactor, querySet *RepoPSMQuerySet) *Re
 
 func (s *RepoQueryServiceImpl) GetRepo(ctx context.Context, req *GetRepoRequest) (*GetRepoResponse, error) {
 	resObject := &GetRepoResponse{}
-	err := s.querySet.Get(ctx, s.db, req, resObject)
+	err := s.querySet.Get(ctx, s.db, req.J5Object(), resObject.J5Object())
 	if err != nil {
 		return nil, err
 	}
@@ -100,7 +88,7 @@ func (s *RepoQueryServiceImpl) GetRepo(ctx context.Context, req *GetRepoRequest)
 
 func (s *RepoQueryServiceImpl) ListRepos(ctx context.Context, req *ListReposRequest) (*ListReposResponse, error) {
 	resObject := &ListReposResponse{}
-	err := s.querySet.List(ctx, s.db, req, resObject)
+	err := s.querySet.List(ctx, s.db, req.J5Object(), resObject.J5Object())
 	if err != nil {
 		return nil, err
 	}
@@ -109,7 +97,7 @@ func (s *RepoQueryServiceImpl) ListRepos(ctx context.Context, req *ListReposRequ
 
 func (s *RepoQueryServiceImpl) ListRepoEvents(ctx context.Context, req *ListRepoEventsRequest) (*ListRepoEventsResponse, error) {
 	resObject := &ListRepoEventsResponse{}
-	err := s.querySet.ListEvents(ctx, s.db, req, resObject)
+	err := s.querySet.ListEvents(ctx, s.db, req.J5Object(), resObject.J5Object())
 	if err != nil {
 		return nil, err
 	}

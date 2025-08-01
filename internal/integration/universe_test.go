@@ -78,7 +78,7 @@ func setupUniverse(ctx context.Context, t flowtest.Asserter, uu *Universe) {
 	grpcPair.ServeUntilDone(t, ctx)
 }
 
-func (uu *Universe) GithubEvent(t flowtest.TB, eventType string, event interface{}) {
+func (uu *Universe) GithubEvent(t flowtest.TB, eventType string, event any) {
 
 	payload, err := json.Marshal(event)
 	if err != nil {

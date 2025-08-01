@@ -63,7 +63,7 @@ func (ss *Publisher) Send(ctx context.Context, msg *SlackMessage) error {
 	body, _ := io.ReadAll(res.Body)
 
 	if res.StatusCode != http.StatusOK {
-		log.WithFields(ctx, map[string]interface{}{
+		log.WithFields(ctx, map[string]any{
 			"status": res.StatusCode,
 			"req":    string(json),
 		}).Error("Failed to send slack message")

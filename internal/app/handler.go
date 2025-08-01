@@ -11,6 +11,7 @@ import (
 	"github.com/pentops/j5/gen/j5/config/v1/config_j5pb"
 	"github.com/pentops/j5/gen/j5/messaging/v1/messaging_j5pb"
 	"github.com/pentops/j5/gen/j5/source/v1/source_j5pb"
+	"github.com/pentops/j5/lib/j5codec"
 	"github.com/pentops/log.go/log"
 	"github.com/pentops/o5-builds/gen/j5/builds/builder/v1/builder_pb"
 	"github.com/pentops/o5-builds/gen/j5/builds/github/v1/github_pb"
@@ -20,7 +21,6 @@ import (
 	"github.com/pentops/o5-messaging/gen/o5/messaging/v1/messaging_tpb"
 	"github.com/pentops/o5-messaging/o5msg"
 	"github.com/pentops/registry/gen/j5/registry/v1/registry_tpb"
-	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -57,7 +57,7 @@ func NewGithubHandler(refs RefMatcher, githubClient IClient, publisher Publisher
 }
 
 func (ww *GithubHandler) Push(ctx context.Context, event *github.PushEvent) error {
-	ctx = log.WithFields(ctx, map[string]interface{}{
+	ctx = log.WithFields(ctx, map[string]any{
 		"owner":     event.Commit.Owner,
 		"repo":      event.Commit.Repo,
 		"commitSha": event.Commit.Sha,
@@ -74,7 +74,7 @@ func (ww *GithubHandler) Push(ctx context.Context, event *github.PushEvent) erro
 }
 
 func (ww *GithubHandler) CheckSuite(ctx context.Context, event *github.CheckSuiteEvent) error {
-	ctx = log.WithFields(ctx, map[string]interface{}{
+	ctx = log.WithFields(ctx, map[string]any{
 		"owner":   event.CheckSuite.Commit.Owner,
 		"repo":    event.CheckSuite.Commit.Repo,
 		"branch":  event.CheckSuite.Branch,
@@ -158,7 +158,7 @@ func (ww *GithubHandler) addBuildContext(ctx context.Context, commit *github_pb.
 			cc.GithubCheckRun = checkRun
 		}
 
-		contextData, err := protojson.Marshal(cc)
+		contextData, err := j5codec.Global.ProtoToJSON(cc.ProtoReflect())
 		if err != nil {
 			return fmt.Errorf("marshal check run: %w", err)
 		}

@@ -3,8 +3,8 @@ package state
 import (
 	"fmt"
 
+	"github.com/pentops/j5/lib/psm"
 	"github.com/pentops/o5-builds/gen/j5/builds/github/v1/github_pb"
-	"github.com/pentops/protostate/psm"
 )
 
 type StateMachines struct {

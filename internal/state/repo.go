@@ -2,12 +2,10 @@ package state
 
 import (
 	"github.com/pentops/o5-builds/gen/j5/builds/github/v1/github_pb"
-	"github.com/pentops/protostate/psm"
 )
 
 func NewRepoPSM() (*github_pb.RepoPSM, error) {
 	sm, err := github_pb.RepoPSMBuilder().
-		SystemActor(psm.MustSystemActor("216B6C2E-D996-492C-B80C-9AAD0CCFEEC4")).
 		BuildStateMachine()
 	if err != nil {
 		return nil, err

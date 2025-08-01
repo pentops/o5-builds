@@ -10,10 +10,10 @@ import (
 func ExpandGitAliases(latestBranch string, commitInfo *source_j5pb.CommitInfo) {
 	aliases := make([]string, 0, len(commitInfo.Aliases))
 	for _, alias := range commitInfo.Aliases {
-		if strings.HasPrefix(alias, "refs/tags/") {
-			aliases = append(aliases, strings.TrimPrefix(alias, "refs/tags/"))
-		} else if strings.HasPrefix(alias, "refs/heads/") {
-			branchName := strings.TrimPrefix(alias, "refs/heads/")
+		if after, ok := strings.CutPrefix(alias, "refs/tags/"); ok {
+			aliases = append(aliases, after)
+		} else if after, ok := strings.CutPrefix(alias, "refs/heads/"); ok {
+			branchName := after
 			aliases = append(aliases, branchName)
 		} else {
 			aliases = append(aliases, alias)

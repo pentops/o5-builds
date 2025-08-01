@@ -4,12 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"os"
 	"time"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/pentops/grpc.go/grpcbind"
+	"github.com/pentops/j5/lib/psm/psmigrate"
 	"github.com/pentops/log.go/log"
-	"github.com/pentops/protostate/psmigrate"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
@@ -92,7 +93,7 @@ func runServiceInfo(_ context.Context, _ struct{}) error {
 		return fmt.Errorf("failed to build OMS: %w", err)
 	}
 	ordersSet.RegisterGRPC(grpcServer)
-	return j5grpc.PrintServerInfo(grpcServer)
+	return j5grpc.PrintServerInfo(os.Stdout, grpcServer)
 }
 
 func runServe(ctx context.Context, config struct {
