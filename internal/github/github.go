@@ -245,7 +245,9 @@ func (cl Client) PullConfig(ctx context.Context, ref *github_pb.Commit, into pro
 			return fmt.Errorf("reading bytes: %s", err)
 		}
 
-		if err := protoyaml.Unmarshal(data, into); err != nil {
+		if err := (&protoyaml.UnmarshalOptions{
+			DiscardUnknown: true,
+		}).Unmarshal(data, into); err != nil {
 			return fmt.Errorf("unmarshalling yaml: %s", err)
 		}
 
