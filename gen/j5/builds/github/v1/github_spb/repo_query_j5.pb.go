@@ -4,6 +4,7 @@ package github_spb
 
 import (
 	j5reflect "github.com/pentops/j5/lib/j5reflect"
+	j5schema "github.com/pentops/j5/lib/j5schema"
 	proto "google.golang.org/protobuf/proto"
 )
 
@@ -71,4 +72,28 @@ func (msg *ListRepoEventsResponse) J5Reflect() j5reflect.Root {
 
 func (msg *ListRepoEventsResponse) J5Object() j5reflect.Object {
 	return j5reflect.MustReflect(msg.ProtoReflect()).(j5reflect.Object)
+}
+
+// GetRepo is a J5 method for service RepoQueryService
+func GetRepoJ5MethodSchema() *j5schema.MethodSchema {
+	return &j5schema.MethodSchema{
+		Request:  j5schema.MustObjectSchema((&GetRepoRequest{}).ProtoReflect().Descriptor()),
+		Response: j5schema.MustObjectSchema((&GetRepoResponse{}).ProtoReflect().Descriptor()),
+	}
+}
+
+// ListRepos is a J5 method for service RepoQueryService
+func ListReposJ5MethodSchema() *j5schema.MethodSchema {
+	return &j5schema.MethodSchema{
+		Request:  j5schema.MustObjectSchema((&ListReposRequest{}).ProtoReflect().Descriptor()),
+		Response: j5schema.MustObjectSchema((&ListReposResponse{}).ProtoReflect().Descriptor()),
+	}
+}
+
+// ListRepoEvents is a J5 method for service RepoQueryService
+func ListRepoEventsJ5MethodSchema() *j5schema.MethodSchema {
+	return &j5schema.MethodSchema{
+		Request:  j5schema.MustObjectSchema((&ListRepoEventsRequest{}).ProtoReflect().Descriptor()),
+		Response: j5schema.MustObjectSchema((&ListRepoEventsResponse{}).ProtoReflect().Descriptor()),
+	}
 }

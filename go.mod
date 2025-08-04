@@ -17,12 +17,12 @@ require (
 	github.com/pentops/flowtest v0.0.0-20250731234319-af76c17154d5
 	github.com/pentops/golib v0.0.0-20250326060930-8c83d58ddb63
 	github.com/pentops/grpc.go v0.0.0-20250604193928-b45524df9c41
-	github.com/pentops/j5 v0.0.0-20250801192111-61f853c07a23
+	github.com/pentops/j5 v0.0.0-20250804180511-490f30d7c098
 	github.com/pentops/log.go v0.0.16
-	github.com/pentops/o5-deploy-aws v0.0.0-20250729161348-8fac1d30696c
-	github.com/pentops/o5-messaging v0.0.0-20250619024104-7e07c29129f0
+	github.com/pentops/o5-deploy-aws v0.0.0-20250804171405-0ef061ecfd45
+	github.com/pentops/o5-messaging v0.0.0-20250804183335-7df32a9e4659
 	github.com/pentops/pgtest.go v0.0.0-20241223222214-7638cc50e15b
-	github.com/pentops/realms v0.0.0-20250715235616-5072ccca27d1
+	github.com/pentops/realms v0.0.0-20250803154340-aacc1b26be5d
 	github.com/pentops/registry v0.0.0-20250709220846-a938303964fc
 	github.com/pentops/runner v0.0.0-20250619010747-2bb7a5385324
 	github.com/pentops/sqrlx.go v0.0.0-20250520210217-2f46de329c7a
@@ -47,7 +47,6 @@ require (
 	github.com/lib/pq v1.10.9 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/pentops/protostate v0.0.0-20250730062913-b66da4576d78 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
 	github.com/stoewer/go-strcase v1.3.1 // indirect

@@ -77,7 +77,7 @@ func (x *RepoEventType) TypeKey() (RepoEventTypeKey, bool) {
 }
 
 type IsRepoEventTypeWrappedType interface {
-	TypeKey() RepoEventTypeKey
+	RepoEventTypeKey() RepoEventTypeKey
 	proto.Message
 }
 
@@ -103,13 +103,13 @@ func (x *RepoEventType) Get() IsRepoEventTypeWrappedType {
 		return nil
 	}
 }
-func (x *RepoEventType_Configure) TypeKey() RepoEventTypeKey {
+func (x *RepoEventType_Configure) RepoEventTypeKey() RepoEventTypeKey {
 	return RepoEvent_Type_Configure
 }
-func (x *RepoEventType_ConfigureBranch) TypeKey() RepoEventTypeKey {
+func (x *RepoEventType_ConfigureBranch) RepoEventTypeKey() RepoEventTypeKey {
 	return RepoEvent_Type_ConfigureBranch
 }
-func (x *RepoEventType_RemoveBranch) TypeKey() RepoEventTypeKey {
+func (x *RepoEventType_RemoveBranch) RepoEventTypeKey() RepoEventTypeKey {
 	return RepoEvent_Type_RemoveBranch
 }
 func (msg *RepoEventType) Clone() any {
@@ -186,7 +186,7 @@ func (x *DeployTargetType) TypeKey() (DeployTargetTypeKey, bool) {
 }
 
 type IsDeployTargetTypeWrappedType interface {
-	TypeKey() DeployTargetTypeKey
+	DeployTargetTypeKey() DeployTargetTypeKey
 	proto.Message
 }
 
@@ -208,10 +208,10 @@ func (x *DeployTargetType) Get() IsDeployTargetTypeWrappedType {
 		return nil
 	}
 }
-func (x *DeployTargetType_J5Build) TypeKey() DeployTargetTypeKey {
+func (x *DeployTargetType_J5Build) DeployTargetTypeKey() DeployTargetTypeKey {
 	return DeployTarget_Type_J5Build
 }
-func (x *DeployTargetType_O5Build) TypeKey() DeployTargetTypeKey {
+func (x *DeployTargetType_O5Build) DeployTargetTypeKey() DeployTargetTypeKey {
 	return DeployTarget_Type_O5Build
 }
 func (msg *DeployTargetType) Clone() any {
