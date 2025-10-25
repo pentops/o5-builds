@@ -25,7 +25,7 @@ type App struct {
 	ReplyWorker    *ReplyWorker
 }
 
-func NewApp(db sqrlx.Transactor, githubClient IClient, slack IBuildPublisher) (*App, error) {
+func NewApp(db sqrlx.Transactor, githubClient IClient, extraPublishers []IBuildPublisher) (*App, error) {
 
 	outboxPub, err := outbox.NewDirectPublisher(db, outbox.DefaultSender)
 	if err != nil {
@@ -55,9 +55,7 @@ func NewApp(db sqrlx.Transactor, githubClient IClient, slack IBuildPublisher) (*
 	publishers := []IBuildPublisher{
 		githubClient,
 	}
-	if slack != nil {
-		publishers = append(publishers, slack)
-	}
+	publishers = append(publishers, extraPublishers...)
 
 	replyWorker, err := NewReplyWorker(publishers...)
 	if err != nil {

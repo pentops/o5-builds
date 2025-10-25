@@ -118,12 +118,14 @@ func runServe(ctx context.Context, config struct {
 		return err
 	}
 
-	var slackClient *slack.Publisher
+	extraPublishers := []app.IBuildPublisher{}
 	if config.SlackURL != "" {
-		slackClient = slack.NewPublisher(config.SlackURL)
+		slackClient := slack.NewPublisher(config.SlackURL)
+		extraPublishers = append(extraPublishers, slackClient)
+
 	}
 
-	ordersSet, err := app.NewApp(db, githubClient, slackClient)
+	ordersSet, err := app.NewApp(db, githubClient, extraPublishers)
 	if err != nil {
 		return fmt.Errorf("failed to build OMS: %w", err)
 	}
