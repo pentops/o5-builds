@@ -91,6 +91,10 @@ func (ss *GithubCommandService) Trigger(ctx context.Context, req *github_spb.Tri
 		Repo:  req.Repo,
 	}
 
+	if req.Commit == "" {
+		req.Commit = "refs/heads/main"
+	}
+
 	if strings.HasPrefix(req.Commit, "refs/") {
 		commit := req.Commit
 		ref.Ref = &commit

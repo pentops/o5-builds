@@ -107,6 +107,7 @@ func NewEnvClient(ctx context.Context) (*Client, error) {
 
 func NewClient(tc *http.Client) (*Client, error) {
 	ghcl := github.NewClient(tc)
+
 	cl := &Client{
 		repositories: ghcl.Repositories,
 		checks:       ghcl.Checks,

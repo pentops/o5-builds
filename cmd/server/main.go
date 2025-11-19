@@ -2,15 +2,12 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"os"
-	"time"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/pentops/grpc.go/grpcbind"
 	"github.com/pentops/j5/lib/psm/psmigrate"
-	"github.com/pentops/log.go/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
@@ -20,7 +17,7 @@ import (
 	"github.com/pentops/o5-builds/internal/slack"
 	"github.com/pentops/o5-builds/internal/state"
 	"github.com/pentops/runner/commander"
-	"github.com/pentops/sqrlx.go/sqrlx"
+	"github.com/pentops/sqrlx.go/pgenv"
 	"github.com/pressly/goose"
 )
 
@@ -36,24 +33,6 @@ func main() {
 	mainGroup.Add("info", commander.NewCommand(runServiceInfo))
 
 	mainGroup.RunMain("registration", Version)
-}
-
-func openDatabase(ctx context.Context, dbURL string) (*sql.DB, error) {
-	db, err := sql.Open("postgres", dbURL)
-	if err != nil {
-		return nil, err
-	}
-
-	for {
-		if err := db.Ping(); err != nil {
-			log.WithError(ctx, err).Warn("pinging PG")
-			time.Sleep(time.Second)
-			continue
-		}
-		break
-	}
-
-	return db, nil
 }
 
 func runPSMTables(ctx context.Context, cfg struct {
@@ -73,17 +52,17 @@ func runPSMTables(ctx context.Context, cfg struct {
 	return nil
 }
 
-func runMigrate(ctx context.Context, config struct {
+func runMigrate(ctx context.Context, cfg struct {
 	MigrationsDir string `env:"MIGRATIONS_DIR" default:"./ext/db"`
-	app.DBConfig
+	pgenv.DatabaseConfig
 }) error {
 
-	db, err := config.OpenDatabase(ctx)
+	db, err := cfg.OpenPostgres(ctx)
 	if err != nil {
 		return err
 	}
 
-	return goose.Up(db, config.MigrationsDir)
+	return goose.Up(db, cfg.MigrationsDir)
 }
 
 func runServiceInfo(_ context.Context, _ struct{}) error {
@@ -97,17 +76,15 @@ func runServiceInfo(_ context.Context, _ struct{}) error {
 }
 
 func runServe(ctx context.Context, config struct {
-	PublicAddr  string `env:"PUBLIC_ADDR" default:":8081"`
-	PostgresURL string `env:"POSTGRES_URL"`
-	SlackURL    string `env:"SLACK_URL" default:""`
+	GRPC     grpcbind.EnvConfig
+	DB       pgenv.DatabaseConfig
+	SlackURL string `env:"SLACK_URL" default:""`
 }) error {
 
-	dbConn, err := openDatabase(ctx, config.PostgresURL)
+	db, err := config.DB.OpenPostgresTransactor(ctx)
 	if err != nil {
 		return err
 	}
-
-	db := sqrlx.NewPostgres(dbConn)
 
 	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
 		app.GRPCMiddleware(Version)...,
@@ -132,5 +109,5 @@ func runServe(ctx context.Context, config struct {
 	ordersSet.RegisterGRPC(grpcServer)
 	reflection.Register(grpcServer)
 
-	return grpcbind.ListenAndServe(ctx, grpcServer, config.PublicAddr)
+	return config.GRPC.ListenAndServe(ctx, grpcServer)
 }

@@ -67,6 +67,7 @@ func (ww *GithubHandler) Push(ctx context.Context, event *github.PushEvent) erro
 
 	if event.Commit.Ref == nil || !strings.HasPrefix(*event.Commit.Ref, "refs/heads/") {
 		log.Info(ctx, "Not a branch push, nothing to do")
+		return nil
 	}
 
 	branchName := strings.TrimPrefix(*event.Commit.Ref, "refs/heads/")

@@ -55,7 +55,7 @@ runtimes:
             database:
               databaseName: main
 
-          - name: PUBLIC_ADDR
+          - name: GRPC_BIND
             value: ":8080"
 
           - name: GH_PRIVATE_KEY
