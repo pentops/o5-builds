@@ -1,12 +1,15 @@
 ---
 bundles:
   - name: builds
-    dir: proto
+    dir: schema
 
 generate:
   - name: go
     inputs:
       - local: builds
+    mods:
+      - goPackageNames:
+          prefix: github.com/pentops/o5-builds/gen
     output: .
     opts:
       paths: import

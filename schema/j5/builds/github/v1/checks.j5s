@@ -1,0 +1,22 @@
+package j5.builds.github.v1
+
+object CheckRun {
+	field checkSuite ! object:CheckSuite
+	field checkName ! string
+	field checkId ! integer:INT64
+}
+
+object CheckSuite {
+	field checkSuiteId ! integer:INT64
+	field branch ! string
+	field commit ! object:Commit
+}
+
+object Commit {
+
+	field owner ! string
+	field repo ! string
+	field sha ! string
+	field ref ? string
+}
+

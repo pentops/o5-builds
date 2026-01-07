@@ -88,7 +88,7 @@ func (ss *GithubCommandService) Trigger(ctx context.Context, req *github_spb.Tri
 
 	ref := &github_pb.Commit{
 		Owner: req.Owner,
-		Repo:  req.Repo,
+		Repo:  req.Name,
 	}
 
 	if req.Commit == "" {

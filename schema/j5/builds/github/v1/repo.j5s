@@ -1,0 +1,79 @@
+package j5.builds.github.v1
+
+entity Repo {
+
+	key owner ! string {
+		primary = true
+	}
+
+	key name ! string {
+		primary = true
+	}
+
+	status ACTIVE
+
+	data checksEnabled bool
+	data branches array:object:Branch
+
+	event Configure {
+		field checksEnabled bool
+		field merge bool
+		field branches array:object:Branch
+	}
+
+	event ConfigureBranch {
+		field branch ! object:Branch
+	}
+
+	event RemoveBranch {
+		field branchName ! string
+	}
+
+	baseUrlPath = "/builds/github/v1/repo"
+	command {
+
+		method ConfigureRepo {
+			httpMethod = "POST"
+			httpPath = "/configure"
+
+			request {
+				field owner ! string
+				field name ! string
+				field config object:"RepoEventType.Configure"
+			}
+		}
+
+		method Trigger {
+			httpMethod = "POST"
+			httpPath = "/trigger"
+
+			request {
+				field owner ! string
+				field name ! string
+				field commit ! string
+				field target ! oneof:DeployTargetType
+			}
+
+			response {
+				field targets array:string
+			}
+		}
+	}
+}
+
+object Branch {
+	field branchName ! string
+	field deployTargets array:oneof:DeployTargetType
+}
+
+oneof DeployTargetType {
+
+	option j5Build object {
+		object.name = "J5Build"
+	}
+
+	option o5Build object {
+		object.name = "O5Build"
+		field environment ! string
+	}
+}

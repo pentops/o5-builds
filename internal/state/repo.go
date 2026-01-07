@@ -18,7 +18,7 @@ func NewRepoPSM() (*github_pb.RepoPSM, error) {
 		OnEvent(github_pb.RepoPSMEventConfigure).
 		SetStatus(github_pb.RepoStatus_ACTIVE).
 		Mutate(github_pb.RepoPSMMutation(func(
-			state *github_pb.RepoStateData,
+			state *github_pb.RepoData,
 			event *github_pb.RepoEventType_Configure,
 		) error {
 			state.ChecksEnabled = event.ChecksEnabled
@@ -40,7 +40,7 @@ func NewRepoPSM() (*github_pb.RepoPSM, error) {
 		OnEvent(github_pb.RepoPSMEventConfigureBranch).
 		SetStatus(github_pb.RepoStatus_ACTIVE).
 		Mutate(github_pb.RepoPSMMutation(func(
-			state *github_pb.RepoStateData,
+			state *github_pb.RepoData,
 			event *github_pb.RepoEventType_ConfigureBranch,
 		) error {
 			state.Branches = mergeBranch(state.Branches, event.Branch)
@@ -52,7 +52,7 @@ func NewRepoPSM() (*github_pb.RepoPSM, error) {
 		github_pb.RepoStatus_ACTIVE,
 	).OnEvent(github_pb.RepoPSMEventRemoveBranch).
 		Mutate(github_pb.RepoPSMMutation(func(
-			state *github_pb.RepoStateData,
+			state *github_pb.RepoData,
 			event *github_pb.RepoEventType_RemoveBranch,
 		) error {
 			for i, branch := range state.Branches {

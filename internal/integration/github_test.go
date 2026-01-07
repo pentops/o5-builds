@@ -59,8 +59,8 @@ func TestO5Trigger(t *testing.T) {
 				Branches: []*github_pb.Branch{{
 					BranchName: "ref1",
 					DeployTargets: []*github_pb.DeployTargetType{{
-						Type: &github_pb.DeployTargetType_O5Build_{
-							O5Build: &github_pb.DeployTargetType_O5Build{
+						Type: &github_pb.DeployTargetType_O_5Build{
+							O_5Build: &github_pb.DeployTargetType_O5Build{
 								Environment: environmentID,
 							},
 						},
@@ -130,8 +130,8 @@ func TestJ5Trigger(t *testing.T) {
 				Branches: []*github_pb.Branch{{
 					BranchName: "ref1",
 					DeployTargets: []*github_pb.DeployTargetType{{
-						Type: &github_pb.DeployTargetType_J5Build_{
-							J5Build: &github_pb.DeployTargetType_J5Build{},
+						Type: &github_pb.DeployTargetType_J_5Build{
+							J_5Build: &github_pb.DeployTargetType_J5Build{},
 						},
 					}},
 				}},

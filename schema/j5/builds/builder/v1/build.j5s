@@ -1,0 +1,72 @@
+package j5.builds.builder.v1
+
+import j5.builds.github.v1:github
+
+entity Build {
+	
+	key buildID ! key:id62 {
+		primary = true
+	}
+
+	key repoOwner ! string
+
+	key repoName ! string
+
+	key commit ! string
+
+	status PENDING
+	status PROGRESS
+	status SUCCESS
+	status FAILURE
+
+	data target oneof:github.DeployTargetType
+
+	data githubCheckRun ? object:github.CheckRun
+
+	event Trigger {
+		field target oneof:github.DeployTargetType
+	}
+
+	event Status {
+		field status ! enum:BuildStatus
+		field output ? object:Output
+	}
+
+	baseUrlPath = "/builds/builder/v1/build"
+	command {
+		method Trigger {
+			httpMethod = "POST"
+			httpPath = "/{owner}/{name}/trigger"
+
+			request {
+				field owner ! string
+				field name ! string
+				field commit ! string
+				field target ! oneof:github.DeployTargetType
+			}
+
+			response {
+				field targets array:string
+			}
+		}
+	}
+
+}
+object BuildContext {
+	field commit ! object:github.Commit
+	field name ! string
+	field githubCheckRun ? object:github.CheckRun
+}
+
+object BuildReport {
+	field build ! object:BuildContext
+	field status ! enum:BuildStatus
+	field output object:Output
+
+}
+
+object Output {
+	field title string
+	field summary string
+	field text ? string
+}

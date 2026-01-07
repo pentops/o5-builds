@@ -236,10 +236,10 @@ func (ww *GithubHandler) buildTargets(ctx context.Context, commit *github_pb.Com
 
 	for _, target := range targets {
 		switch target := target.Type.(type) {
-		case *github_pb.DeployTargetType_O5Build_:
-			o5Envs = append(o5Envs, target.O5Build.Environment)
+		case *github_pb.DeployTargetType_O_5Build:
+			o5Envs = append(o5Envs, target.O_5Build.Environment)
 
-		case *github_pb.DeployTargetType_J5Build_:
+		case *github_pb.DeployTargetType_J_5Build:
 			j5Build = true
 		default:
 			return nil, fmt.Errorf("unknown target type: %T", target)
