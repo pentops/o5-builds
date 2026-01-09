@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"math/rand"
 
-	"buf.build/go/protoyaml"
 	"github.com/pentops/j5/gen/j5/source/v1/source_j5pb"
+	"github.com/pentops/j5/lib/j5reflect"
+	"github.com/pentops/j5/lib/protoread"
 	"github.com/pentops/o5-builds/gen/j5/builds/builder/v1/builder_pb"
 	"github.com/pentops/o5-builds/gen/j5/builds/github/v1/github_pb"
-	"google.golang.org/protobuf/proto"
 )
 
 type GithubMock struct {
@@ -58,7 +58,7 @@ func (gh *GithubMock) BranchHead(ctx context.Context, ref *github_pb.Commit) (st
 	return "12345", nil
 }
 
-func (gh *GithubMock) PullConfig(ctx context.Context, ref *github_pb.Commit, into proto.Message, tryPaths []string) error {
+func (gh *GithubMock) PullConfig(ctx context.Context, ref *github_pb.Commit, into j5reflect.Object, tryPaths []string) error {
 	repo, ok := gh.Repos[ref.Owner+"/"+ref.Repo]
 	if !ok {
 		return fmt.Errorf("repo not found")
@@ -75,7 +75,7 @@ func (gh *GithubMock) PullConfig(ctx context.Context, ref *github_pb.Commit, int
 			continue
 		}
 
-		if err := protoyaml.Unmarshal([]byte(data), into); err != nil {
+		if err := protoread.Parse(path, []byte(data), into); err != nil {
 			return fmt.Errorf("unmarshalling yaml: %s", err)
 		}
 

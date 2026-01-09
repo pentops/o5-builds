@@ -13,16 +13,16 @@ import (
 	"path/filepath"
 	"strings"
 
-	"buf.build/go/protoyaml"
 	ghinstallation "github.com/bradleyfalzon/ghinstallation/v2"
 	"github.com/pentops/envconf.go/envconf"
 	"github.com/pentops/golib/gl"
 	"github.com/pentops/j5/gen/j5/source/v1/source_j5pb"
+	"github.com/pentops/j5/lib/j5reflect"
+	"github.com/pentops/j5/lib/protoread"
 	"github.com/pentops/log.go/log"
 	"github.com/pentops/o5-builds/gen/j5/builds/builder/v1/builder_pb"
 	"github.com/pentops/o5-builds/gen/j5/builds/github/v1/github_pb"
 	"golang.org/x/oauth2"
-	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/google/go-github/v58/github"
@@ -224,7 +224,7 @@ func (cl Client) PublishBuildReport(ctx context.Context, msg *builder_pb.BuildRe
 	return err
 }
 
-func (cl Client) PullConfig(ctx context.Context, ref *github_pb.Commit, into proto.Message, tryPaths []string) error {
+func (cl Client) PullConfig(ctx context.Context, ref *github_pb.Commit, into j5reflect.Object, tryPaths []string) error {
 
 	opts := &github.RepositoryContentGetOptions{
 		Ref: ref.Sha,
@@ -246,10 +246,8 @@ func (cl Client) PullConfig(ctx context.Context, ref *github_pb.Commit, into pro
 			return fmt.Errorf("reading bytes: %s", err)
 		}
 
-		if err := (&protoyaml.UnmarshalOptions{
-			DiscardUnknown: true,
-		}).Unmarshal(data, into); err != nil {
-			return fmt.Errorf("unmarshalling yaml: %s", err)
+		if err := protoread.Parse(path, data, into); err != nil {
+			return fmt.Errorf("parsing proto: %s", err)
 		}
 
 		return nil

@@ -12,6 +12,7 @@ import (
 	"github.com/pentops/j5/gen/j5/messaging/v1/messaging_j5pb"
 	"github.com/pentops/j5/gen/j5/source/v1/source_j5pb"
 	"github.com/pentops/j5/lib/j5codec"
+	"github.com/pentops/j5/lib/j5reflect"
 	"github.com/pentops/log.go/log"
 	"github.com/pentops/o5-builds/gen/j5/builds/builder/v1/builder_pb"
 	"github.com/pentops/o5-builds/gen/j5/builds/github/v1/github_pb"
@@ -21,11 +22,10 @@ import (
 	"github.com/pentops/o5-messaging/gen/o5/messaging/v1/messaging_tpb"
 	"github.com/pentops/o5-messaging/o5msg"
 	"github.com/pentops/registry/gen/j5/registry/v1/registry_tpb"
-	"google.golang.org/protobuf/proto"
 )
 
 type IClient interface {
-	PullConfig(ctx context.Context, ref *github_pb.Commit, into proto.Message, tryPaths []string) error
+	PullConfig(ctx context.Context, ref *github_pb.Commit, into j5reflect.Object, tryPaths []string) error
 	GetCommit(ctx context.Context, ref *github_pb.Commit) (*source_j5pb.CommitInfo, error)
 	CreateCheckRun(ctx context.Context, ref *github_pb.Commit, name string, status *builder_pb.BuildReport) (*github_pb.CheckRun, error)
 	PublishBuildReport(ctx context.Context, status *builder_pb.BuildReport) error
@@ -295,7 +295,7 @@ var o5ConfigPaths = []string{
 
 func (ww *GithubHandler) o5Build(ctx context.Context, commit *github_pb.Commit, targetEnvs []string) ([]*awsdeployer_tpb.RequestDeploymentMessage, *CheckRunError) {
 	cfg := &application_pb.Application{}
-	err := ww.github.PullConfig(ctx, commit, cfg, o5ConfigPaths)
+	err := ww.github.PullConfig(ctx, commit, cfg.J5Object(), o5ConfigPaths)
 	if err != nil {
 		return nil, &CheckRunError{
 			RunName: "o5-config",
@@ -354,7 +354,7 @@ func (ww *GithubHandler) j5Build(ctx context.Context, commit *github_pb.Commit) 
 	commit.Sha = commitInfo.Hash
 
 	cfg := &config_j5pb.RepoConfigFile{}
-	err = ww.github.PullConfig(ctx, commit, cfg, configPaths)
+	err = ww.github.PullConfig(ctx, commit, cfg.J5Object(), configPaths)
 	if err != nil {
 		log.WithError(ctx, err).Error("Config Error")
 		return nil, &CheckRunError{
@@ -381,7 +381,7 @@ func (ww *GithubHandler) j5Build(ctx context.Context, commit *github_pb.Commit) 
 		for _, configPath := range bundleConfigPaths {
 			paths = append(paths, path.Join(bundle.Dir, configPath))
 		}
-		if err := ww.github.PullConfig(ctx, commit, bundleConfig, paths); err != nil {
+		if err := ww.github.PullConfig(ctx, commit, bundleConfig.J5Object(), paths); err != nil {
 			return nil, &CheckRunError{
 				RunName: "j5-config",
 				Title:   "j5 bundle config error",
